@@ -14,8 +14,9 @@ resource "aws_amplify_app" "frontend" {
         build:
           commands:
             - npm run build
+            - npm run export
       artifacts:
-        baseDirectory: frontend/.next
+        baseDirectory: frontend/out
         files:
           - '**/*'
       cache:
@@ -48,7 +49,7 @@ resource "aws_amplify_branch" "main" {
   app_id      = aws_amplify_app.frontend.id
   branch_name = "main"
 
-  framework = "Next.js - SSR"
+  framework = "Next.js - SSG"
   stage     = lookup(local.env_stage_map, var.env, "DEVELOPMENT")
 
   environment_variables = {

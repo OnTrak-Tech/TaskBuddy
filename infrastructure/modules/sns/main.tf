@@ -43,7 +43,7 @@ resource "aws_sns_topic_policy" "deadline_reminders_policy" {
         Effect = "Allow",
         Principal = "*",
         Action = "SNS:Publish",
-        Resource = aws_sns_topic.deadline_reminders.arn  # ✅ Exactly one ARN
+        Resource = aws_sns_topic.deadline_reminders.arn  
       }
     ]
   })

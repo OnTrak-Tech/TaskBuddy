@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+# TaskBuddy
+=======
+>>>>>>> 44d3f8a (Initial commit)
 # TaskBuddy - Task Management System
 
 A serverless task management system for field teams with role-based access, real-time notifications, and comprehensive task tracking.
@@ -27,4 +33,9 @@ TaskBuddy/
 2. Deploy backend Lambda functions
 3. Deploy frontend to AWS Amplify
 
+<<<<<<< HEAD
 See detailed instructions in each directory's README.
+=======
+See detailed instructions in each directory's README.
+>>>>>>> d2fb771 (Initial commit)
+>>>>>>> 44d3f8a (Initial commit)

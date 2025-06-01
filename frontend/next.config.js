@@ -2,11 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  output: 'export',
   images: {
-    domains: [
-      `${process.env.NEXT_PUBLIC_APP_NAME}-${process.env.NEXT_PUBLIC_ENV}-attachments.s3.amazonaws.com`,
-    ],
+    unoptimized: true,
+    // Use hardcoded values instead of environment variables
+    domains: ['taskbuddy-dev-attachments.s3.amazonaws.com'],
   },
+  // Add this to ensure proper static export
+  trailingSlash: true,
 }
 
 module.exports = nextConfig
