@@ -19,8 +19,17 @@ export default function Tasks() {
     return null;
   }
 
+  // Define task type
+  interface Task {
+    id: string;
+    title: string;
+    status: string;
+    dueDate: string;
+    location: string;
+  }
+
   // Sample tasks data
-  const sampleTasks = [
+  const sampleTasks: Task[] = [
     { id: 'T1', title: 'Site inspection', status: 'completed', dueDate: '2023-06-15', location: 'North Building' },
     { id: 'T2', title: 'Equipment maintenance', status: 'in-progress', dueDate: '2023-06-20', location: 'Workshop' },
     { id: 'T3', title: 'Client meeting', status: 'pending', dueDate: '2023-06-25', location: 'Conference Room' },
@@ -30,7 +39,7 @@ export default function Tasks() {
     ? sampleTasks 
     : sampleTasks.filter(task => task.status === activeTab);
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch(status) {
       case 'completed': return <FaCheckCircle className="text-green-500" />;
       case 'in-progress': return <FaHourglassHalf className="text-yellow-500" />;
