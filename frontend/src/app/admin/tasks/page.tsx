@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { FaPlus, FaEdit, FaTrash, FaUser, FaClock } from 'react-icons/fa';
 
+// Task interface to ensure strong typing
 interface Task {
   id: string;
   title: string;
@@ -18,6 +19,11 @@ interface Task {
   assignedTo: string;
   assignedToName?: string;
   createdAt: string;
+}
+
+// Optional: Define API response structure for clarity
+interface TaskApiResponse {
+  tasks: Task[];
 }
 
 export default function AdminTasksPage() {
@@ -30,12 +36,18 @@ export default function AdminTasksPage() {
     const fetchTasks = async () => {
       try {
         setLoading(true);
+
+        // Fetch from Amplify API
         const { body } = await get({
           apiName: 'TaskBuddyAPI',
           path: '/admin/tasks'
         }).response;
-        const responseData = await body.json();
-        setTasks(Array.isArray(responseData?.tasks) ? responseData.tasks : []);
+
+        // ✅ FIX: Cast the response to our known type to avoid TypeScript error
+        const responseData = (await body.json()) as unknown as TaskApiResponse;
+
+        // ✅ Check if responseData.tasks is an array before setting
+        setTasks(Array.isArray(responseData.tasks) ? responseData.tasks : []);
         setError(null);
       } catch (err) {
         console.error('Error fetching tasks:', err);
@@ -50,12 +62,14 @@ export default function AdminTasksPage() {
 
   const deleteTask = async (taskId: string) => {
     if (!confirm('Are you sure you want to delete this task?')) return;
-    
+
     try {
       await del({
         apiName: 'TaskBuddyAPI',
         path: `/admin/tasks/${taskId}`
       });
+
+      // Remove task from local state
       setTasks(tasks.filter(task => task.id !== taskId));
     } catch (err) {
       console.error('Error deleting task:', err);
@@ -83,11 +97,14 @@ export default function AdminTasksPage() {
         </Button>
       </div>
 
+      {/* Loading Spinner */}
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
+
       ) : error ? (
+        // Error Message UI
         <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
           <div className="flex">
             <div className="ml-3">
@@ -95,7 +112,9 @@ export default function AdminTasksPage() {
             </div>
           </div>
         </div>
+
       ) : tasks.length === 0 ? (
+        // Empty State
         <div className="text-center py-12">
           <p className="text-gray-500">No tasks created yet.</p>
           <Button 
@@ -106,26 +125,18 @@ export default function AdminTasksPage() {
             <FaPlus className="mr-2" /> Create Your First Task
           </Button>
         </div>
+
       ) : (
+        // Tasks Table
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Task
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Assigned To
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
