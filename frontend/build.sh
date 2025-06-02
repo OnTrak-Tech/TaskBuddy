@@ -4,6 +4,6 @@ npm run build
 echo "Export completed. Copying files..."
 mkdir -p out/_next
 cp -r .next/static out/_next/
-echo "Copying CSS files..."
-cp -r src/styles/globals.css out/styles.css
+echo "Adding Tailwind CSS to all HTML files..."
+node postbuild.js
 echo "Build process completed!"

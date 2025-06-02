@@ -8,7 +8,7 @@ frontend:
     build:
       commands:
         - npm run build
-        - cp -r src/styles/globals.css out/styles.css
+        - node postbuild.js
   artifacts:
     baseDirectory: frontend/out
     files:
