@@ -31,31 +31,49 @@ export default function ProfilePage() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
         if (user) {
-          // In a real app, you would fetch this from your API
-          const { body } = await get({
+          // Call your API
+          const response = await get({
             apiName: 'TaskBuddyAPI',
-            path: '/profile'
-          }).response;
-          const response = await body.json();
-          setProfile({
-            name: response.name || user.attributes?.name || '',
-            email: user.attributes?.email || '',
-            phone: response.phone || user.attributes?.phone_number || '',
-            jobTitle: response.jobTitle || '',
-            department: response.department || '',
-            preferredContactMethod: response.preferredContactMethod || 'email',
+            path: '/profile',
           });
+
+          // response can be unknown, so safely parse and assert shape
+          const data = response as unknown;
+
+          // Check if data is an object (not null or array) before using it
+          if (data && typeof data === 'object' && !Array.isArray(data)) {
+            // Extract fields with fallback to user attributes or defaults
+            const safeData = data as Partial<UserProfile>;
+
+            setProfile({
+              name: safeData.name || user.attributes?.name || '',
+              email: user.attributes?.email || '',
+              phone: safeData.phone || user.attributes?.phone_number || '',
+              jobTitle: safeData.jobTitle || '',
+              department: safeData.department || '',
+              preferredContactMethod: safeData.preferredContactMethod || 'email',
+            });
+          } else {
+            // If response is invalid, fallback to user attributes only
+            setProfile({
+              name: user.attributes?.name || '',
+              email: user.attributes?.email || '',
+              phone: user.attributes?.phone_number || '',
+              jobTitle: '',
+              department: '',
+              preferredContactMethod: 'email',
+            });
+          }
         }
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-        // Fallback to user attributes from Cognito
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        // On error fallback to user attributes only
         if (user) {
           setProfile({
             name: user.attributes?.name || '',
@@ -76,29 +94,28 @@ export default function ProfilePage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setProfile({
-      ...profile,
+    setProfile(prev => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setSaving(true);
-      // In a real app, you would save this to your API
+      // Save updated profile to your API
       await put({
         apiName: 'TaskBuddyAPI',
         path: '/profile',
         options: {
-          body: profile
-        }
+          body: profile as any,
+        },
       });
-      
       toast.success('Profile updated successfully!');
-    } catch (err) {
-      console.error('Error updating profile:', err);
+    } catch (error) {
+      console.error('Error updating profile:', error);
       toast.error('Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
@@ -126,16 +143,12 @@ export default function ProfilePage() {
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900">{profile.name || 'User'}</h2>
                 <p className="text-gray-500">{profile.email}</p>
-                {profile.jobTitle && (
-                  <p className="text-gray-500 mt-1">{profile.jobTitle}</p>
-                )}
-                {profile.department && (
-                  <p className="text-gray-500">{profile.department}</p>
-                )}
+                {profile.jobTitle && <p className="text-gray-500 mt-1">{profile.jobTitle}</p>}
+                {profile.department && <p className="text-gray-500">{profile.department}</p>}
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="lg:col-span-2">
             <Card>
               <form onSubmit={handleSubmit}>
@@ -153,7 +166,7 @@ export default function ProfilePage() {
                       placeholder="Enter your full name"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="email" className="form-label">Email Address</label>
                     <Input
@@ -167,7 +180,7 @@ export default function ProfilePage() {
                     />
                     <p className="mt-1 text-xs text-gray-500">Email cannot be changed. Contact administrator for assistance.</p>
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="phone" className="form-label">Phone Number</label>
                     <Input
@@ -178,7 +191,7 @@ export default function ProfilePage() {
                       placeholder="Enter your phone number"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="jobTitle" className="form-label">Job Title</label>
                     <Input
@@ -189,7 +202,7 @@ export default function ProfilePage() {
                       placeholder="Enter your job title"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="department" className="form-label">Department</label>
                     <Input
@@ -200,7 +213,7 @@ export default function ProfilePage() {
                       placeholder="Enter your department"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="preferredContactMethod" className="form-label">Preferred Contact Method</label>
                     <select
@@ -217,11 +230,7 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    type="submit"
-                    isLoading={saving}
-                    className="w-full"
-                  >
+                  <Button type="submit" isLoading={saving} className="w-full">
                     <FaSave className="mr-2" /> Save Changes
                   </Button>
                 </CardFooter>
