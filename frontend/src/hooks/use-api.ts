@@ -122,7 +122,8 @@ export function useApi() {
         path
       }).response;
       
-      const responseData = await response.body.json();
+      const responseData = response; // The data is already parsed
+
       
       if (options?.showSuccessToast) {
         toast.success(options.successMessage || 'Successfully deleted');
