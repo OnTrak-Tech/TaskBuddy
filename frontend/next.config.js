@@ -2,28 +2,16 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  trailingSlash: true,
-  output: 'export',
   images: {
-    unoptimized: true,
-    domains: [
-      'taskbuddy-files.s3.eu-west-1.amazonaws.com',
-      'taskbuddy-user-files.s3.amazonaws.com'
-    ],
+    domains: ['via.placeholder.com'],
   },
+  // Ensure environment variables are available to the client
   env: {
-    NEXT_PUBLIC_API_URL: 'https://uzoqf3buyb.execute-api.eu-west-1.amazonaws.com/Prod',
-    NEXT_PUBLIC_COGNITO_USER_POOL_ID: 'eu-west-1_J7EKiwTfA',
-    NEXT_PUBLIC_COGNITO_CLIENT_ID: 'n7u78450uvmbtgjdf6iai58cm',
-    NEXT_PUBLIC_REGION: 'eu-west-1',
+    NEXT_PUBLIC_REGION: process.env.NEXT_PUBLIC_REGION,
+    NEXT_PUBLIC_COGNITO_USER_POOL_ID: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
+    NEXT_PUBLIC_COGNITO_CLIENT_ID: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
-  publicRuntimeConfig: {
-    NEXT_PUBLIC_API_URL: 'https://uzoqf3buyb.execute-api.eu-west-1.amazonaws.com/Prod',
-    NEXT_PUBLIC_COGNITO_USER_POOL_ID: 'eu-west-1_J7EKiwTfA',
-    NEXT_PUBLIC_COGNITO_CLIENT_ID: 'n7u78450uvmbtgjdf6iai58cm',
-    NEXT_PUBLIC_REGION: 'eu-west-1',
-  },
-  assetPrefix: '.',
 }
 
 module.exports = nextConfig
