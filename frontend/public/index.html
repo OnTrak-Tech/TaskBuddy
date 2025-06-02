@@ -9,42 +9,111 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #4f46e5 0%, #7e22ce 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .loading-spinner {
+    .container {
+      background-color: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      padding: 2rem;
+      max-width: 28rem;
+      width: 100%;
+      text-align: center;
+      margin: 1rem;
+    }
+    .icon-container {
+      margin: 0 auto 1.5rem auto;
+      height: 5rem;
+      width: 5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background-color: #eef2ff;
+    }
+    .icon {
+      height: 2.5rem;
+      width: 2.5rem;
+      color: #4f46e5;
+    }
+    .title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.75rem;
+    }
+    .subtitle {
+      font-size: 1.125rem;
+      color: #4b5563;
+      margin-bottom: 2rem;
+    }
+    .spinner {
+      margin: 0 auto 1.5rem auto;
+      width: 3.5rem;
+      height: 3.5rem;
+      border: 4px solid #4f46e5;
+      border-top-color: transparent;
+      border-radius: 9999px;
       animation: spin 1s linear infinite;
+    }
+    .loading-text {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: #4f46e5;
+    }
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: center;
+    }
+    .footer span {
+      font-size: 0.875rem;
+    }
+    .footer .powered-by {
+      color: #9ca3af;
+      margin-right: 0.5rem;
+    }
+    .footer .vendor {
+      color: #4b5563;
+      font-weight: 500;
     }
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    .bg-gradient {
-      background: linear-gradient(135deg, #4f46e5 0%, #7e22ce 100%);
-    }
-    .shadow-card {
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
   </style>
 </head>
-<body class="bg-gradient min-h-screen">
-  <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-xl shadow-card max-w-md w-full text-center">
-      <div class="mx-auto h-20 w-20 flex items-center justify-center rounded-full bg-indigo-50 mb-6">
-        <svg class="h-10 w-10 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-      </div>
-      <h1 class="text-4xl font-bold text-gray-900 mb-3">TaskBuddy</h1>
-      <p class="text-gray-600 mb-8 text-lg">Task Management System for Field Teams</p>
-      <div class="loading-spinner w-14 h-14 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-6"></div>
-      <p class="text-indigo-600 font-medium text-lg">Loading your dashboard...</p>
-      
-      <div class="mt-8 pt-6 border-t border-gray-100">
-        <div class="flex justify-center space-x-4">
-          <span class="text-gray-400 text-sm">Powered by</span>
-          <span class="text-gray-600 font-medium text-sm">AWS Amplify</span>
-        </div>
-      </div>
+<body>
+  <div class="container">
+    <div class="icon-container">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+    </div>
+    <h1 class="title">TaskBuddy</h1>
+    <p class="subtitle">Task Management System for Field Teams</p>
+    <div class="spinner"></div>
+    <p class="loading-text">Loading your dashboard...</p>
+    
+    <div class="footer">
+      <span class="powered-by">Powered by</span>
+      <span class="vendor">AWS Amplify</span>
     </div>
   </div>
+  
+  <script>
+    // Redirect to the app after a short delay
+    setTimeout(function() {
+      window.location.href = 'index.html';
+    }, 2000);
+  </script>
 </body>
 </html>
