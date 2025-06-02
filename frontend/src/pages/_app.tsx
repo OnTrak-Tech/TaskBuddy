@@ -10,17 +10,17 @@ import { AuthProvider } from '@/context/AuthContext';
 // Configure Amplify
 Amplify.configure({
   Auth: {
-    region: process.env.NEXT_PUBLIC_REGION,
-    userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
-    userPoolWebClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
+    region: process.env.NEXT_PUBLIC_REGION || 'eu-west-1',
+    userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || 'eu-west-1_J7EKiwTfA',
+    userPoolWebClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || 'n7u78450uvmbtgjdf6iai58cm',
     mandatorySignIn: true,
   },
   API: {
     endpoints: [
       {
         name: 'TaskBuddyAPI',
-        endpoint: process.env.NEXT_PUBLIC_API_URL,
-        region: process.env.NEXT_PUBLIC_REGION,
+        endpoint: process.env.NEXT_PUBLIC_API_URL || 'https://uzoqf3buyb.execute-api.eu-west-1.amazonaws.com/Prod',
+        region: process.env.NEXT_PUBLIC_REGION || 'eu-west-1',
       },
     ],
   },
