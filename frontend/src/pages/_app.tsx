@@ -6,6 +6,7 @@ import '@aws-amplify/ui-react/styles.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from '@/context/AuthContext';
+import Head from 'next/head';
 
 // Configure Amplify
 Amplify.configure({
@@ -30,6 +31,10 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <Authenticator.Provider>
       <AuthProvider>
+        <Head>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="stylesheet" href="./styles.css" />
+        </Head>
         <Component {...pageProps} />
         <ToastContainer position="bottom-right" />
       </AuthProvider>

@@ -1,0 +1,18 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend
+        - npm ci
+    build:
+      commands:
+        - npm run build
+        - cp -r src/styles/globals.css out/styles.css
+  artifacts:
+    baseDirectory: frontend/out
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend/node_modules/**/*

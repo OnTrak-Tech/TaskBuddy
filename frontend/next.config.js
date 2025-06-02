@@ -23,6 +23,7 @@ const nextConfig = {
     NEXT_PUBLIC_COGNITO_CLIENT_ID: 'n7u78450uvmbtgjdf6iai58cm',
     NEXT_PUBLIC_REGION: 'eu-west-1',
   },
+  assetPrefix: '.',
 }
 
 module.exports = nextConfig
