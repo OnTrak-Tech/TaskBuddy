@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   trailingSlash: true,
-  distDir: 'public',
+  output: 'export',
   images: {
     unoptimized: true,
     domains: [
