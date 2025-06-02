@@ -24,6 +24,11 @@ interface Task {
   createdAt: string;
 }
 
+// Define API response structure
+interface TaskApiResponse {
+  tasks: Task[];
+}
+
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +43,8 @@ export default function TasksPage() {
           apiName: 'TaskBuddyAPI',
           path: '/tasks'
         }).response;
-        const data = await response.body.json();
-        setTasks(data.tasks || []);
+        const data = (await response.body.json()) as unknown as TaskApiResponse;
+        setTasks(Array.isArray(data.tasks) ? data.tasks : []);
         setError(null);
       } catch (err) {
         console.error('Error fetching tasks:', err);
