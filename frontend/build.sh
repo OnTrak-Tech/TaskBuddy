@@ -1,3 +1,7 @@
 #!/bin/bash
+echo "Building TaskBuddy frontend..."
 npm run build
-cp -r .next/static public/_next/static
+echo "Export completed. Copying files..."
+mkdir -p out/_next
+cp -r .next/static out/_next/
+echo "Build process completed!"
