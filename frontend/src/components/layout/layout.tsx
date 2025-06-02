@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import Sidebar from './sidebar';
 
@@ -11,6 +11,11 @@ interface LayoutProps {
 
 export default function Layout({ children, title = 'TaskBuddy' }: LayoutProps) {
   const { isAuthenticated, isLoading } = useAuth();
+
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => setHasMounted(true), []);
+
+  if (!hasMounted) return null; // Prevent hydration mismatch
 
   if (isLoading) {
     return (
