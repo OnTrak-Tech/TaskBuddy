@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API } from 'aws-amplify';
+import { get, put } from 'aws-amplify/api';
 import { useAuth } from '@/context/auth-context';
 import Layout from '@/components/layout/layout';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
@@ -39,7 +39,11 @@ export default function ProfilePage() {
         setLoading(true);
         if (user) {
           // In a real app, you would fetch this from your API
-          const response = await API.get('TaskBuddyAPI', '/profile', {});
+          const { body } = await get({
+            apiName: 'TaskBuddyAPI',
+            path: '/profile'
+          }).response;
+          const response = await body.json();
           setProfile({
             name: response.name || user.attributes?.name || '',
             email: user.attributes?.email || '',
@@ -84,8 +88,12 @@ export default function ProfilePage() {
     try {
       setSaving(true);
       // In a real app, you would save this to your API
-      await API.put('TaskBuddyAPI', '/profile', {
-        body: profile
+      await put({
+        apiName: 'TaskBuddyAPI',
+        path: '/profile',
+        options: {
+          body: profile
+        }
       });
       
       toast.success('Profile updated successfully!');

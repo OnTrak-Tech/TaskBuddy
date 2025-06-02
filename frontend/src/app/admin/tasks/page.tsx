@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API } from 'aws-amplify';
+import { get, del } from 'aws-amplify/api';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/layout/layout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -30,8 +30,12 @@ export default function AdminTasksPage() {
     const fetchTasks = async () => {
       try {
         setLoading(true);
-        const response = await API.get('TaskBuddyAPI', '/admin/tasks', {});
-        setTasks(response.tasks || []);
+        const { body } = await get({
+          apiName: 'TaskBuddyAPI',
+          path: '/admin/tasks'
+        }).response;
+        const responseData = await body.json();
+        setTasks(Array.isArray(responseData?.tasks) ? responseData.tasks : []);
         setError(null);
       } catch (err) {
         console.error('Error fetching tasks:', err);
@@ -48,7 +52,10 @@ export default function AdminTasksPage() {
     if (!confirm('Are you sure you want to delete this task?')) return;
     
     try {
-      await API.del('TaskBuddyAPI', `/admin/tasks/${taskId}`, {});
+      await del({
+        apiName: 'TaskBuddyAPI',
+        path: `/admin/tasks/${taskId}`
+      });
       setTasks(tasks.filter(task => task.id !== taskId));
     } catch (err) {
       console.error('Error deleting task:', err);

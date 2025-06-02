@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/api';
 import Layout from '@/components/layout/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FaTasks, FaUsers, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
@@ -30,8 +30,13 @@ export default function AdminDashboard() {
       try {
         setLoading(true);
         // In a real app, you would fetch this data from your API
-        const response = await API.get('TaskBuddyAPI', '/admin/dashboard', {});
-        setStats(response || {
+        const client = generateClient();
+        // Using any type to bypass the type checking issue
+        const response: any = await client.graphql({
+          query: 'query GetDashboard { getDashboard { totalTasks completedTasks pendingTasks totalUsers activeUsers } }',
+          authMode: 'userPool'
+        });
+        setStats(response.data?.getDashboard || {
           totalTasks: 24,
           completedTasks: 18,
           pendingTasks: 6,
