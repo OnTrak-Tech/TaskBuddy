@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
-import { FaTasks, FaUser, FaUsers, FaChartBar, FaBell, FaSignOutAlt, FaClipboardList } from 'react-icons/fa';
+import { FaTasks, FaUser, FaUsers, FaChartBar, FaBell, FaSignOutAlt, FaClipboardList, FaUserPlus } from 'react-icons/fa';
 
 export default function Sidebar() {
   const { isAdmin, signOut, user } = useAuth();
@@ -43,9 +43,17 @@ export default function Sidebar() {
               <FaUsers className="mr-3 h-5 w-5" />
               Users
             </Link>
+            <Link href="/admin/users/create" className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive('/admin/users/create')}`}>
+              <FaUserPlus className="mr-3 h-5 w-5" />
+              Create User
+            </Link>
             <Link href="/admin/tasks" className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive('/admin/tasks')}`}>
               <FaTasks className="mr-3 h-5 w-5" />
               Tasks
+            </Link>
+            <Link href="/admin/tasks/create" className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive('/admin/tasks/create')}`}>
+              <FaClipboardList className="mr-3 h-5 w-5" />
+              Create Task
             </Link>
           </>
         ) : (

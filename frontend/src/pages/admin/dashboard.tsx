@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
 import Layout from '@/components/Layout';
-import { FaUsers, FaTasks, FaBell, FaChartBar } from 'react-icons/fa';
+import { FaUsers, FaTasks, FaBell, FaChartBar, FaUserPlus, FaClipboardList } from 'react-icons/fa';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
   const { isAuthenticated, isAdmin, user } = useAuth();
@@ -39,13 +40,15 @@ export default function AdminDashboard() {
                 Welcome back, {user?.attributes?.name || user?.attributes?.email || 'Admin'}
               </p>
             </div>
-            <div className="ml-4 mt-2 flex-shrink-0">
-              <button
-                type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Create New Task
-              </button>
+            <div className="ml-4 mt-2 flex-shrink-0 space-x-3">
+              <Link href="/admin/users/create" className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <FaUserPlus className="-ml-1 mr-2 h-4 w-4" />
+                Create User
+              </Link>
+              <Link href="/admin/tasks/create" className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <FaClipboardList className="-ml-1 mr-2 h-4 w-4" />
+                Create Task
+              </Link>
             </div>
           </div>
         </div>
