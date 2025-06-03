@@ -47,38 +47,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Ensure Amplify is configured before making auth calls
         configureAmplify();
         
-        // Get current user
-        const userInfo = await getCurrentUser();
-        // Get session to access tokens
-        const session = await fetchAuthSession();
-        
-        setIsAuthenticated(true);
-        
-        const currentUser = {
-          ...userInfo,
-          attributes: {
-            email: userInfo.username,
-            ...userInfo.signInDetails?.loginId ? { email: userInfo.signInDetails.loginId } : {}
-          }
-        };
-        
-        setUser(currentUser);
-        
-        // Check if user is admin
-        const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
-        setIsAdmin(Array.isArray(groups) && groups.includes('admin'));
+        try {
+          // Get current user
+          const userInfo = await getCurrentUser();
+          // Get session to access tokens
+          const session = await fetchAuthSession();
+          
+          setIsAuthenticated(true);
+          
+          const currentUser = {
+            ...userInfo,
+            attributes: {
+              email: userInfo.username,
+              ...userInfo.signInDetails?.loginId ? { email: userInfo.signInDetails.loginId } : {}
+            }
+          };
+          
+          setUser(currentUser);
+          
+          // Check if user is admin
+          const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
+          setIsAdmin(Array.isArray(groups) && groups.includes('admin'));
+        } catch (authError) {
+          // Expected for unauthenticated users
+          console.log('User not authenticated');
+          setUser(null);
+          setIsAdmin(false);
+          setIsAuthenticated(false);
+        }
       } catch (error) {
-        console.error('Error fetching user', error);
+        console.error('Error in auth setup:', error);
         setUser(null);
         setIsAdmin(false);
         setIsAuthenticated(false);
-        
-        // Don't throw errors for auth-related issues as they're expected for unauthenticated users
-        if (error instanceof Error && 
-            !error.toString().includes('UserUnAuthenticatedException') && 
-            !error.toString().includes('No current user')) {
-          console.error('Unexpected auth error:', error);
-        }
       } finally {
         setIsLoading(false);
       }
