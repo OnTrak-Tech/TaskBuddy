@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'aws-amplify/auth';
+import { signIn, signOut } from 'aws-amplify/auth';
 import React from 'react';
 import { Amplify } from 'aws-amplify';
 
@@ -24,6 +24,15 @@ export default function Login() {
     setError('');
     
     try {
+      // Sign out first to handle "already authenticated" error
+      try {
+        await signOut();
+        console.log('Successfully signed out previous user');
+      } catch (signOutErr) {
+        console.log('No previous user to sign out or error signing out');
+      }
+      
+      // Now attempt to sign in
       console.log('Attempting to sign in with username:', username);
       const signInResult = await signIn({ username, password });
       console.log('Sign in successful:', signInResult);
