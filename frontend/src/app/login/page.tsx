@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'aws-amplify/auth';
+import React from 'react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
