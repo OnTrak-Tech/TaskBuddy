@@ -47,15 +47,17 @@ export default function Login() {
         console.log('User groups:', groups);
         console.log('Is admin:', isAdmin);
         
-        // Redirect based on role
+        // Redirect based on role using window.location for full page navigation
         if (isAdmin) {
-          router.push('/admin/dashboard');
+          console.log('Admin user detected - navigating to admin dashboard');
+          window.location.href = '/admin/dashboard';
         } else {
-          router.push('/tasks');
+          console.log('Regular user detected - navigating to tasks');
+          window.location.href = '/tasks';
         }
       } catch (sessionErr) {
         console.error('Error checking user role:', sessionErr);
-        router.push('/tasks'); // Default fallback
+        window.location.href = '/tasks'; // Default fallback
       }
     } catch (err: any) {
       console.error('Error signing in:', err);
@@ -68,10 +70,10 @@ export default function Login() {
   // For testing/development only - hardcoded admin login
   const handleDevLogin = () => {
     setLoading(true);
+    // Use window.location for a full page navigation instead of Next.js router
     setTimeout(() => {
-      console.log('Development login successful');
-      router.push('/admin/dashboard');
-      setLoading(false);
+      console.log('Development login successful - forcing navigation');
+      window.location.href = '/admin/dashboard';
     }, 1000);
   };
 
