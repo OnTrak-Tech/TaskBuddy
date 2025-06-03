@@ -12,6 +12,14 @@ export function configureAmplify() {
           username: true,
           email: true,
         },
+        signUpVerificationMethod: 'code',
+        oauth: {
+          domain: 'taskbuddy-auth-domain.auth.eu-west-1.amazoncognito.com',
+          scope: ['email', 'profile', 'openid'],
+          redirectSignIn: ['https://main.dhdbdqe5k5n4p.amplifyapp.com/'],
+          redirectSignOut: ['https://main.dhdbdqe5k5n4p.amplifyapp.com/'],
+          responseType: 'code'
+        }
       }
     },
     API: {
