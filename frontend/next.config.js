@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
+  output: 'export',
   images: {
     domains: ['via.placeholder.com'],
+    unoptimized: true,
   },
   // Ensure environment variables are available to the client
   env: {
