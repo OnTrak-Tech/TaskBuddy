@@ -36,7 +36,27 @@ export default function Login() {
       console.log('Attempting to sign in with username:', username);
       const signInResult = await signIn({ username, password });
       console.log('Sign in successful:', signInResult);
-      router.push('/tasks');
+      
+      // Check if user is admin by fetching session
+      try {
+        const { fetchAuthSession } = await import('aws-amplify/auth');
+        const session = await fetchAuthSession();
+        const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
+        const isAdmin = Array.isArray(groups) && groups.includes('admin');
+        
+        console.log('User groups:', groups);
+        console.log('Is admin:', isAdmin);
+        
+        // Redirect based on role
+        if (isAdmin) {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/tasks');
+        }
+      } catch (sessionErr) {
+        console.error('Error checking user role:', sessionErr);
+        router.push('/tasks'); // Default fallback
+      }
     } catch (err: any) {
       console.error('Error signing in:', err);
       setError(err.message || 'Authentication failed. Please check your credentials.');
