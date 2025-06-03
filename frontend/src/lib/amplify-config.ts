@@ -29,7 +29,6 @@ export function configureAmplify() {
         }
       }
     });
-    console.log('Amplify configured successfully');
     isConfigured = true;
   } catch (error) {
     console.error('Error configuring Amplify:', error);

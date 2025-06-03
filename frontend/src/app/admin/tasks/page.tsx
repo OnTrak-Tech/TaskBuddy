@@ -1,196 +1,168 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { get, del } from 'aws-amplify/api';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/auth-context';
 import Layout from '@/components/layout/layout';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
-import { FaPlus, FaEdit, FaTrash, FaUser, FaClock } from 'react-icons/fa';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Task interface to ensure strong typing
 interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  status: 'pending' | 'in_progress' | 'completed';
+  assignedTo: {
+    id: string;
+    username: string;
+  };
   dueDate: string;
-  assignedTo: string;
-  assignedToName?: string;
-  createdAt: string;
-}
-
-// Optional: Define API response structure for clarity
-interface TaskApiResponse {
-  tasks: Task[];
 }
 
 export default function AdminTasksPage() {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+
+  // Force authentication and admin check
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        window.location.replace('/');
+      } else if (!isAdmin) {
+        window.location.replace('/tasks');
+      }
+    }
+  }, [isAuthenticated, isAdmin, isLoading]);
 
   useEffect(() => {
     const fetchTasks = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-
-        // Fetch from Amplify API
-        const { body } = await get({
-          apiName: 'TaskBuddyAPI',
-          path: '/admin/tasks'
-        }).response;
-
-        // ✅ FIX: Cast the response to our known type to avoid TypeScript error
-        const responseData = (await body.json()) as unknown as TaskApiResponse;
-
-        // ✅ Check if responseData.tasks is an array before setting
-        setTasks(Array.isArray(responseData.tasks) ? responseData.tasks : []);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching tasks:', err);
-        setError('Failed to load tasks. Please try again later.');
+        // In a real app, you would fetch from your API
+        // For now, using mock data
+        const mockTasks: Task[] = [
+          {
+            id: '1',
+            title: 'Complete project documentation',
+            description: 'Write up the final documentation for the project',
+            status: 'in_progress',
+            assignedTo: {
+              id: '1',
+              username: 'johndoe'
+            },
+            dueDate: '2023-12-15'
+          },
+          {
+            id: '2',
+            title: 'Review code changes',
+            description: 'Review pull request #42 with the new features',
+            status: 'pending',
+            assignedTo: {
+              id: '2',
+              username: 'janedoe'
+            },
+            dueDate: '2023-12-10'
+          },
+          {
+            id: '3',
+            title: 'Update dependencies',
+            description: 'Update all npm packages to their latest versions',
+            status: 'completed',
+            assignedTo: {
+              id: '3',
+              username: 'bobsmith'
+            },
+            dueDate: '2023-12-05'
+          }
+        ];
+        setTasks(mockTasks);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTasks();
-  }, []);
-
-  const deleteTask = async (taskId: string) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
-
-    try {
-      await del({
-        apiName: 'TaskBuddyAPI',
-        path: `/admin/tasks/${taskId}`
-      });
-
-      // Remove task from local state
-      setTasks(tasks.filter(task => task.id !== taskId));
-    } catch (err) {
-      console.error('Error deleting task:', err);
-      setError('Failed to delete task. Please try again.');
+    if (isAuthenticated && isAdmin) {
+      fetchTasks();
     }
-  };
+  }, [isAuthenticated, isAdmin]);
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
-      case 'IN_PROGRESS':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-
-  return (
-    <Layout title="Manage Tasks">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Manage Tasks</h1>
-        <Button onClick={() => router.push('/admin/tasks/create')}>
-          <FaPlus className="mr-2" /> Create Task
-        </Button>
-      </div>
-
-      {/* Loading Spinner */}
-      {loading ? (
+  if (isLoading || loading) {
+    return (
+      <Layout title="Task Management">
         <div className="flex justify-center py-12">
           <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
+      </Layout>
+    );
+  }
 
-      ) : error ? (
-        // Error Message UI
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-          <div className="flex">
-            <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          </div>
+  return (
+    <Layout title="Task Management">
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Task Management</h1>
+          <p className="text-gray-500 mt-1">View and manage all tasks in the system.</p>
         </div>
+        <button
+          onClick={() => router.push('/admin/tasks/create')}
+          className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          Create New Task
+        </button>
+      </div>
 
-      ) : tasks.length === 0 ? (
-        // Empty State
+      {tasks.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">No tasks created yet.</p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => router.push('/admin/tasks/create')}
-          >
-            <FaPlus className="mr-2" /> Create Your First Task
-          </Button>
+          <p className="text-gray-500">No tasks found in the system.</p>
         </div>
-
       ) : (
-        // Tasks Table
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {tasks.map((task) => (
-                <tr key={task.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{task.title}</div>
-                    <div className="text-sm text-gray-500">{task.description.substring(0, 50)}...</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
-                        <FaUser className="text-gray-500" />
-                      </div>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900">
-                          {task.assignedToName || 'User ' + task.assignedTo.substring(0, 8)}
-                        </div>
-                      </div>
+        <div className="grid gap-6">
+          {tasks.map((task) => (
+            <Card key={task.id}>
+              <CardHeader>
+                <CardTitle>{task.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">{task.description}</p>
+                <div className="flex flex-wrap items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      <span className="font-medium">Assigned to:</span> {task.assignedTo.username}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      <span className="font-medium">Due:</span> {new Date(task.dueDate).toLocaleDateString()}
+                    </p>
+                    <div className="mt-2">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        task.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                        task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : 
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {task.status === 'in_progress' ? 'In Progress' : 
+                         task.status === 'completed' ? 'Completed' : 'Pending'}
+                      </span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FaClock className="mr-1" />
-                      {formatDate(task.dueDate)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(task.status)}`}>
-                      {task.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-primary-600 hover:text-primary-900 mr-2"
-                      onClick={() => router.push(`/admin/tasks/edit/${task.id}`)}
+                  </div>
+                  <div className="flex space-x-2 mt-4 sm:mt-0">
+                    <button
+                      onClick={() => router.push(`/admin/tasks/${task.id}`)}
+                      className="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                     >
-                      <FaEdit />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => deleteTask(task.id)}
+                      Edit
+                    </button>
+                    <button
+                      className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
-                      <FaTrash />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </Layout>
