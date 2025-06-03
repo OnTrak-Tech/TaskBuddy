@@ -29,7 +29,8 @@ export default function Home() {
 
   const handleSignIn = async () => {
     try {
-      await signInWithRedirect();
+      // Use window.location for direct navigation to Cognito login
+      window.location.href = `https://taskbuddy-auth-domain.auth.eu-west-1.amazoncognito.com/login?client_id=${process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || 'n7u78450uvmbtgjdf6iai58cm'}&response_type=code&scope=email+openid+profile&redirect_uri=${encodeURIComponent('https://main.dhdbdqe5k5n4p.amplifyapp.com/')}`;
     } catch (error) {
       console.error('Error signing in', error);
     }
