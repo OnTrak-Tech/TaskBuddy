@@ -26,10 +26,10 @@ export default function Layout({ children, title = 'TaskBuddy' }: LayoutProps) {
   }
 
   // Only check authentication for non-login pages
-  if (!isAuthenticated && !window.location.pathname.includes('/login')) {
-    console.log('User not authenticated, redirecting to login');
-    window.location.replace('/');
-    return null;
+  if (!isAuthenticated) {
+    console.log('User not authenticated in layout component');
+    // Don't redirect, just render the children
+    return <main>{children}</main>;
   }
 
   return (

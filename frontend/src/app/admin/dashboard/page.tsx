@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/auth-context';
 import { generateClient } from 'aws-amplify/api';
 import Layout from '@/components/layout/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,22 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  
+  // Force authentication and admin check
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        console.error('Not authenticated, redirecting to home');
+        window.location.replace('/');
+      } else if (!isAdmin) {
+        console.error('Not an admin, redirecting to tasks');
+        window.location.replace('/tasks');
+      } else {
+        console.log('Admin dashboard - auth check passed');
+      }
+    }
+  }, [isAuthenticated, isAdmin, isLoading]);
   const [stats, setStats] = useState<DashboardStats>({
     totalTasks: 0,
     completedTasks: 0,
