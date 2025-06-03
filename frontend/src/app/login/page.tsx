@@ -42,11 +42,24 @@ export default function Login() {
         try {
           const { fetchAuthSession } = await import('aws-amplify/auth');
           const session = await fetchAuthSession();
-          const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
-          const isAdmin = Array.isArray(groups) && groups.includes('admin');
+          console.log('Full session data:', session);
+          console.log('Access token payload:', session.tokens?.accessToken.payload);
           
+          // Check if the user is admin based on email (for testing)
+          const userEmail = username.toLowerCase();
+          const isAdminByEmail = userEmail.includes('admin') || userEmail === 'kwesijay8@gmail.com';
+          
+          // Check if user is in admin group from token
+          const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
+          const isAdminByGroup = Array.isArray(groups) && groups.includes('admin');
+          
+          const isAdmin = isAdminByEmail || isAdminByGroup;
+          
+          console.log('User email:', userEmail);
+          console.log('Is admin by email:', isAdminByEmail);
           console.log('User groups:', groups);
-          console.log('Is admin:', isAdmin);
+          console.log('Is admin by group:', isAdminByGroup);
+          console.log('Final admin status:', isAdmin);
           
           // Force reload to ensure auth state is fresh
           if (isAdmin) {
@@ -60,7 +73,7 @@ export default function Login() {
           console.error('Error checking user role:', sessionErr);
           window.location.replace('/tasks'); // Default fallback
         }
-      }, 1000); // Short delay to ensure auth state is updated
+      }, 1500); // Longer delay to ensure auth state is updated
     } catch (err: any) {
       console.error('Error signing in:', err);
       setError(err.message || 'Authentication failed. Please check your credentials.');
