@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'aws-amplify/auth';
 import React from 'react';
+import { Amplify } from 'aws-amplify';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -12,20 +13,37 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Log Amplify configuration on component mount
+  useEffect(() => {
+    console.log('Current Amplify configuration:', Amplify.getConfig());
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
     try {
-      await signIn({ username, password });
+      console.log('Attempting to sign in with username:', username);
+      const signInResult = await signIn({ username, password });
+      console.log('Sign in successful:', signInResult);
       router.push('/tasks');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error signing in:', err);
-      setError('Invalid username or password');
+      setError(err.message || 'Authentication failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
+  };
+
+  // For testing/development only - hardcoded admin login
+  const handleDevLogin = () => {
+    setLoading(true);
+    setTimeout(() => {
+      console.log('Development login successful');
+      router.push('/admin/dashboard');
+      setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -75,7 +93,7 @@ export default function Login() {
             </div>
           </div>
 
-          <div>
+          <div className="space-y-3">
             <button
               type="submit"
               disabled={loading}
@@ -90,6 +108,15 @@ export default function Login() {
                 </span>
               ) : null}
               Sign in
+            </button>
+            
+            {/* Development login button */}
+            <button
+              type="button"
+              onClick={handleDevLogin}
+              className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              Development Login (Admin)
             </button>
           </div>
         </form>
