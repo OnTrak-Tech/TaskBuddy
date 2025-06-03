@@ -46,23 +46,40 @@ export default function AdminDashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // In a real app, you would fetch this data from your API
-        const client = generateClient();
-        // Using any type to bypass the type checking issue
-        const response: any = await client.graphql({
-          query: 'query GetDashboard { getDashboard { totalTasks completedTasks pendingTasks totalUsers activeUsers } }',
-          authMode: 'userPool'
-        });
-        setStats(response.data?.getDashboard || {
-          totalTasks: 24,
-          completedTasks: 18,
-          pendingTasks: 6,
-          totalUsers: 12,
-          activeUsers: 8,
-        });
-        setError(null);
+        
+        // Only fetch data if authenticated and admin
+        if (isAuthenticated && isAdmin && !isLoading) {
+          // In a real app, you would fetch this data from your API
+          const client = generateClient();
+          try {
+            // Using any type to bypass the type checking issue
+            const response: any = await client.graphql({
+              query: 'query GetDashboard { getDashboard { totalTasks completedTasks pendingTasks totalUsers activeUsers } }',
+              authMode: 'userPool'
+            });
+            
+            setStats(response.data?.getDashboard || {
+              totalTasks: 24,
+              completedTasks: 18,
+              pendingTasks: 6,
+              totalUsers: 12,
+              activeUsers: 8,
+            });
+            setError(null);
+          } catch (apiErr) {
+            console.error('Error fetching dashboard data:', apiErr);
+            // Fallback to sample data for demo purposes
+            setStats({
+              totalTasks: 24,
+              completedTasks: 18,
+              pendingTasks: 6,
+              totalUsers: 12,
+              activeUsers: 8,
+            });
+          }
+        }
       } catch (err) {
-        console.error('Error fetching dashboard data:', err);
+        console.error('Error in dashboard data fetch:', err);
         // Fallback to sample data for demo purposes
         setStats({
           totalTasks: 24,
@@ -76,8 +93,11 @@ export default function AdminDashboard() {
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    // Only fetch data when auth state is determined
+    if (!isLoading) {
+      fetchDashboardData();
+    }
+  }, [isAuthenticated, isAdmin, isLoading]);
 
   const completionRate = stats.totalTasks > 0 
     ? Math.round((stats.completedTasks / stats.totalTasks) * 100) 

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { fetchAuthSession, getCurrentUser, signOut as amplifySignOut } from 'aws-amplify/auth';
+import { configureAmplify } from '@/lib/amplify-config';
 
 interface User {
   username: string;
@@ -43,6 +44,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const checkUser = async () => {
       setIsLoading(true);
       try {
+        // Ensure Amplify is configured before making auth calls
+        configureAmplify();
+        
         // Get current user
         const userInfo = await getCurrentUser();
         // Get session to access tokens
@@ -68,6 +72,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(null);
         setIsAdmin(false);
         setIsAuthenticated(false);
+        
+        // Don't throw errors for auth-related issues as they're expected for unauthenticated users
+        if (error instanceof Error && 
+            !error.toString().includes('UserUnAuthenticatedException') && 
+            !error.toString().includes('No current user')) {
+          console.error('Unexpected auth error:', error);
+        }
       } finally {
         setIsLoading(false);
       }
