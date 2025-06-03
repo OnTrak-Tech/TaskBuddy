@@ -37,32 +37,33 @@ export default function Login() {
       const signInResult = await signIn({ username, password });
       console.log('Sign in successful:', signInResult);
       
-      // Check if user is admin by fetching session
-      try {
-        const { fetchAuthSession } = await import('aws-amplify/auth');
-        const session = await fetchAuthSession();
-        const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
-        const isAdmin = Array.isArray(groups) && groups.includes('admin');
-        
-        console.log('User groups:', groups);
-        console.log('Is admin:', isAdmin);
-        
-        // Redirect based on role using window.location for full page navigation
-        if (isAdmin) {
-          console.log('Admin user detected - navigating to admin dashboard');
-          window.location.href = '/admin/dashboard';
-        } else {
-          console.log('Regular user detected - navigating to tasks');
-          window.location.href = '/tasks';
+      // Wait a moment for the auth state to update
+      setTimeout(async () => {
+        try {
+          const { fetchAuthSession } = await import('aws-amplify/auth');
+          const session = await fetchAuthSession();
+          const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
+          const isAdmin = Array.isArray(groups) && groups.includes('admin');
+          
+          console.log('User groups:', groups);
+          console.log('Is admin:', isAdmin);
+          
+          // Force reload to ensure auth state is fresh
+          if (isAdmin) {
+            console.log('Admin user detected - navigating to admin dashboard');
+            window.location.replace('/admin/dashboard');
+          } else {
+            console.log('Regular user detected - navigating to tasks');
+            window.location.replace('/tasks');
+          }
+        } catch (sessionErr) {
+          console.error('Error checking user role:', sessionErr);
+          window.location.replace('/tasks'); // Default fallback
         }
-      } catch (sessionErr) {
-        console.error('Error checking user role:', sessionErr);
-        window.location.href = '/tasks'; // Default fallback
-      }
+      }, 1000); // Short delay to ensure auth state is updated
     } catch (err: any) {
       console.error('Error signing in:', err);
       setError(err.message || 'Authentication failed. Please check your credentials.');
-    } finally {
       setLoading(false);
     }
   };

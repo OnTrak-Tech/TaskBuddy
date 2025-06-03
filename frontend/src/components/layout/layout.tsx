@@ -25,8 +25,11 @@ export default function Layout({ children, title = 'TaskBuddy' }: LayoutProps) {
     );
   }
 
-  if (!isAuthenticated) {
-    return <main>{children}</main>;
+  // Only check authentication for non-login pages
+  if (!isAuthenticated && !window.location.pathname.includes('/login')) {
+    console.log('User not authenticated, redirecting to login');
+    window.location.replace('/');
+    return null;
   }
 
   return (
