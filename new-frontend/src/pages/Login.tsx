@@ -38,6 +38,10 @@ const Login = () => {
       // 2. Refresh AuthContext so user/isAdmin is updated
       await refreshAuthState();
 
+         // 3. Add direct navigation here
+      const userIsAdmin = email.includes('admin');
+      navigate(userIsAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
+
       // 3. Let useEffect handle the redirection
       toast.success('Login successful');
     } catch (error: any) {
