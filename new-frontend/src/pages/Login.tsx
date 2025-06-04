@@ -16,6 +16,7 @@ const Login = () => {
   useEffect(() => {
     console.log('Auth state')
     if (isAuthenticated) {
+      console.log('Navigating to dashboard');
       navigate(isAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
     }
   }, [isAuthenticated, isAdmin, navigate]);
