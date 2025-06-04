@@ -1,8 +1,21 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { fetchAuthSession, getCurrentUser, signOut as amplifySignOut } from 'aws-amplify/auth';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
+import {
+  fetchAuthSession,
+  getCurrentUser,
+  signOut as amplifySignOut,
+} from 'aws-amplify/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+// ==================
+// Type Definitions
+// ==================
 interface User {
   username: string;
   attributes: {
@@ -21,17 +34,24 @@ interface AuthContextType {
   refreshAuthState: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
+const defaultContext: AuthContextType = {
   user: null,
   isAdmin: false,
   isAuthenticated: false,
   isLoading: true,
   signOut: async () => {},
   refreshAuthState: async () => {},
-});
+};
 
+// ==================
+// Context Creation
+// ==================
+const AuthContext = createContext<AuthContextType>(defaultContext);
 export const useAuth = () => useContext(AuthContext);
 
+// ==================
+// Provider Component
+// ==================
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -39,45 +59,43 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // For demo purposes - simulate admin check based on email
-  const checkIsAdmin = (email: string) => {
-    return email.includes('admin');
+  // Helper: Admin detection logic (customize as needed)
+  const checkIsAdmin = (email: string): boolean => {
+    return email.toLowerCase().includes('admin');
   };
 
+  // ==================
+  // Fetch Current User
+  // ==================
   const checkUser = async () => {
     try {
       const userInfo = await getCurrentUser();
-      // Fetch session but not using it directly for now
-      await fetchAuthSession();
-      
-      const currentUser = {
-        ...userInfo,
+      await fetchAuthSession(); // Required to confirm session validity
+
+      const currentUser: User = {
+        username: userInfo.username,
         attributes: {
-          email: userInfo.username,
-          ...userInfo.signInDetails?.loginId ? { email: userInfo.signInDetails.loginId } : {}
-        }
+          email: userInfo.signInDetails?.loginId || userInfo.username,
+        },
       };
-      
+
+      const email = currentUser.attributes.email;
+      const adminStatus = checkIsAdmin(email);
+
       setUser(currentUser);
+      setIsAdmin(adminStatus);
       setIsAuthenticated(true);
-      
-      // For demo purposes, check if admin based on email
-      const userEmail = currentUser.attributes.email;
-      const userIsAdmin = checkIsAdmin(userEmail);
-      setIsAdmin(userIsAdmin);
-      
-      console.log('Auth state updated:', { 
-        authenticated: true, 
-        isAdmin: userIsAdmin,
-        email: userEmail
+
+      console.log('✅ Authenticated:', {
+        email,
+        isAdmin: adminStatus,
       });
-      
     } catch (error) {
-      console.log('Not authenticated');
+      console.log('🚫 Not authenticated:', error);
       setUser(null);
       setIsAdmin(false);
       setIsAuthenticated(false);
@@ -86,15 +104,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // Initial check on mount
   useEffect(() => {
     checkUser();
   }, []);
 
+  // ==================
+  // Refresh Auth State
+  // ==================
   const refreshAuthState = async () => {
     setIsLoading(true);
     await checkUser();
   };
 
+  // ==================
+  // Sign Out
+  // ==================
   const signOut = async () => {
     try {
       setIsLoading(true);
@@ -113,7 +138,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, isAuthenticated, isLoading, signOut, refreshAuthState }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAdmin,
+        isAuthenticated,
+        isLoading,
+        signOut,
+        refreshAuthState,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

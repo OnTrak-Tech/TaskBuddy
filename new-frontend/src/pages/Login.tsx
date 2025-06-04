@@ -8,20 +8,12 @@ import Button from '../components/ui/Button';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, refreshAuthState } = useAuth();
 
-  // Handle successful login and navigation
-  useEffect(() => {
-    if (loginSuccess && email) {
-      const userIsAdmin = email.includes('admin'); // Temporary logic for demo
-      navigate(userIsAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
-    }
-  }, [loginSuccess, email, navigate]);
-
-  // Redirect if already authenticated
+  // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated) {
       navigate(isAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
@@ -30,22 +22,24 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast.error('Please enter both email and password');
       return;
     }
-    
-    setIsLoading(true);
-    
+
+    setIsSubmitting(true);
+
     try {
       await signIn({ username: email, password });
+      await refreshAuthState();
       toast.success('Login successful');
-      setLoginSuccess(true);
+      navigate(email.toLowerCase().includes('admin') ? '/admin/dashboard' : '/tasks', { replace: true });
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.message || 'Failed to sign in');
-      setIsLoading(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -54,34 +48,39 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">TaskBuddy</h1>
-          <h2 className="mt-2 text-xl font-medium text-gray-700">Sign in to your account</h2>
+          <p className="mt-2 text-lg text-gray-700">Sign in to your account</p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -90,13 +89,8 @@ const Login = () => {
           </div>
 
           <div>
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
-              isLoading={isLoading}
-            >
-              Sign in
+            <Button type="submit" variant="primary" fullWidth isLoading={isSubmitting}>
+              Sign In
             </Button>
           </div>
         </form>
