@@ -14,7 +14,7 @@ const Login = () => {
   const { isAuthenticated, isAdmin, refreshAuthState } = useAuth();
 
   useEffect(() => {
-    console.log('Auth state:', { isAuthenticated, isAdmin });
+    console.log('Auth state')
     if (isAuthenticated) {
       navigate(isAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
     }
@@ -33,9 +33,6 @@ const Login = () => {
     try {
       // 1. Sign in with Amplify
       await signIn({ username: email, password });
-
-      // Add a short delay to allow Amplify to persist the session
-      await new Promise((resolve) => setTimeout(resolve, 300));
 
       // 2. Refresh AuthContext so user/isAdmin is updated
       await refreshAuthState();
