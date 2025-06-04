@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
+import { useApi } from '../../hooks/useApi'
 import cognitoAdmin from '../../lib/cognitoAdmin'
 
 const CreateUser = () => {
@@ -13,7 +14,7 @@ const CreateUser = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const navigate = useNavigate()
-  // useApi hook is imported but not used in this component
+  const { callApi } = useApi()
   
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()

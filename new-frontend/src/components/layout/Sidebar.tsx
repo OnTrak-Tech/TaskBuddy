@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext'
 const Sidebar = () => {
   const { signOut, user } = useAuth()
   
-  // Determine if user is admin (this is a placeholder - implement based on your user roles)
-  const isAdmin = user?.attributes?.['custom:role'] === 'admin'
+  // Check if user is in the admin group
+  const isAdmin = user?.signInUserSession?.accessToken?.payload['cognito:groups']?.includes('admin')
 
   return (
     <div className="w-64 bg-white shadow-md h-full">
@@ -52,16 +52,28 @@ const Sidebar = () => {
           )}
           
           {!isAdmin && (
-            <li>
-              <NavLink 
-                to="/tasks" 
-                className={({ isActive }) => 
-                  `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
-                }
-              >
-                My Tasks
-              </NavLink>
-            </li>
+            <>
+              <li>
+                <NavLink 
+                  to="/dashboard" 
+                  className={({ isActive }) => 
+                    `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
+                  }
+                >
+                  Dashboard
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/tasks" 
+                  className={({ isActive }) => 
+                    `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
+                  }
+                >
+                  My Tasks
+                </NavLink>
+              </li>
+            </>
           )}
           
           <li>

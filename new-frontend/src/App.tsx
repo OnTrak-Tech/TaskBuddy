@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/auth/ProtectedRoute'
+import AdminRoute from './components/auth/AdminRoute'
+import UserRoute from './components/auth/UserRoute'
 import Layout from './components/layout/Layout'
 
 // Pages
@@ -13,6 +15,7 @@ import CreateTask from './pages/admin/CreateTask'
 import CreateUser from './pages/admin/CreateUser'
 import UserDetails from './pages/admin/UserDetails'
 import ResetPassword from './pages/admin/ResetPassword'
+import UserDashboard from './pages/user/Dashboard'
 import UserTasks from './pages/user/Tasks'
 import TaskDetail from './pages/user/TaskDetail'
 
@@ -34,22 +37,27 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           
-          {/* Protected routes */}
+          {/* Protected routes for all authenticated users */}
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route path="/" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             
-            {/* Admin routes */}
-            <Route path="/admin/tasks" element={<Tasks />} />
-            <Route path="/admin/users" element={<Users />} />
-            <Route path="/admin/tasks/create" element={<CreateTask />} />
-            <Route path="/admin/users/create" element={<CreateUser />} />
-            <Route path="/admin/users/:id" element={<UserDetails />} />
-            <Route path="/admin/users/:username/reset-password" element={<ResetPassword />} />
+            {/* Admin routes - only accessible to admin users */}
+            <Route element={<AdminRoute />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/admin/tasks" element={<Tasks />} />
+              <Route path="/admin/users" element={<Users />} />
+              <Route path="/admin/tasks/create" element={<CreateTask />} />
+              <Route path="/admin/users/create" element={<CreateUser />} />
+              <Route path="/admin/users/:id" element={<UserDetails />} />
+              <Route path="/admin/users/:username/reset-password" element={<ResetPassword />} />
+            </Route>
             
-            {/* User routes */}
-            <Route path="/tasks" element={<UserTasks />} />
-            <Route path="/tasks/:id" element={<TaskDetail />} />
+            {/* User routes - accessible to all authenticated users */}
+            <Route element={<UserRoute />}>
+              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/tasks" element={<UserTasks />} />
+              <Route path="/tasks/:id" element={<TaskDetail />} />
+            </Route>
           </Route>
           
           <Route path="*" element={<NotFound />} />
