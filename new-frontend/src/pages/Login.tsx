@@ -13,8 +13,8 @@ const Login = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, refreshAuthState } = useAuth();
 
-  // Redirect if already logged in
   useEffect(() => {
+    console.log('Auth state:', { isAuthenticated, isAdmin });
     if (isAuthenticated) {
       navigate(isAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
     }
@@ -31,10 +31,17 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
+      // 1. Sign in with Amplify
       await signIn({ username: email, password });
+
+      // Add a short delay to allow Amplify to persist the session
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // 2. Refresh AuthContext so user/isAdmin is updated
       await refreshAuthState();
+
+      // 3. Let useEffect handle the redirection
       toast.success('Login successful');
-      navigate(email.toLowerCase().includes('admin') ? '/admin/dashboard' : '/tasks', { replace: true });
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.message || 'Failed to sign in');

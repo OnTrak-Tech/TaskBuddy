@@ -7,7 +7,7 @@ type ProtectedRouteProps = {
 };
 
 const ProtectedRoute = ({ allowedRole }: ProtectedRouteProps) => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -19,13 +19,16 @@ const ProtectedRoute = ({ allowedRole }: ProtectedRouteProps) => {
   }
 
   // If not authenticated, redirect to login
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check role-based access
-  if (allowedRole === 'admin' && !isAdmin) {
-    return <Navigate to="/" replace />;
+  // Determine role of user
+  const userRole = isAdmin ? 'admin' : 'user';
+
+  // If user does not have allowed role, redirect
+  if (allowedRole && userRole !== allowedRole) {
+    return <Navigate to="/login" replace />;
   }
 
   return (
