@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -22,11 +24,15 @@ public class CreateTaskHandler implements RequestHandler<APIGatewayProxyRequestE
     private static final Logger logger = LoggerFactory.getLogger(CreateTaskHandler.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final DynamoDbClient dynamoDbClient;
+    private final SqsClient sqsClient;
     private final String tasksTableName;
+    private final String notificationQueueUrl;
 
     public CreateTaskHandler() {
         this.dynamoDbClient = DynamoDbClient.create();
+        this.sqsClient = SqsClient.create();
         this.tasksTableName = System.getenv("TASKS_TABLE_NAME");
+        this.notificationQueueUrl = System.getenv("NOTIFICATION_QUEUE_URL");
     }
 
     @Override
@@ -56,6 +62,11 @@ public class CreateTaskHandler implements RequestHandler<APIGatewayProxyRequestE
             
             // Save task to DynamoDB
             saveTaskToDynamoDB(task);
+            
+            // Send notification if task is assigned to a user
+            if (task.getAssignedTo() != null && !task.getAssignedTo().isEmpty()) {
+                sendTaskAssignmentNotification(task);
+            }
             
             // Return success response
             return ApiGatewayResponse.created(objectMapper.writeValueAsString(task));
@@ -105,5 +116,27 @@ public class CreateTaskHandler implements RequestHandler<APIGatewayProxyRequestE
                 .build();
         
         dynamoDbClient.putItem(putItemRequest);
+    }
+    
+    private void sendTaskAssignmentNotification(Task task) {
+        try {
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("type", "NEW_TASK");
+            notification.put("taskId", task.getTaskId());
+            notification.put("title", task.getTitle());
+            notification.put("assignedTo", task.getAssignedTo());
+            
+            String messageBody = objectMapper.writeValueAsString(notification);
+            
+            SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+                    .queueUrl(notificationQueueUrl)
+                    .messageBody(messageBody)
+                    .build();
+            
+            sqsClient.sendMessage(sendMessageRequest);
+            logger.info("Task assignment notification sent for task: {}", task.getTaskId());
+        } catch (Exception e) {
+            logger.error("Error sending task assignment notification", e);
+        }
     }
 }

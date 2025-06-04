@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -26,14 +28,18 @@ public class AdminCreateUserHandler implements RequestHandler<APIGatewayProxyReq
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final DynamoDbClient dynamoDbClient;
     private final CognitoIdentityProviderClient cognitoClient;
+    private final SqsClient sqsClient;
     private final String userPoolId;
     private final String usersTableName;
+    private final String notificationQueueUrl;
 
     public AdminCreateUserHandler() {
         this.dynamoDbClient = DynamoDbClient.create();
         this.cognitoClient = CognitoIdentityProviderClient.create();
+        this.sqsClient = SqsClient.create();
         this.userPoolId = System.getenv("COGNITO_USER_POOL_ID");
         this.usersTableName = System.getenv("USERS_TABLE_NAME");
+        this.notificationQueueUrl = System.getenv("NOTIFICATION_QUEUE_URL");
     }
 
     @Override
@@ -61,6 +67,9 @@ public class AdminCreateUserHandler implements RequestHandler<APIGatewayProxyReq
             user.setIsActive(true);
             
             saveUserToDynamoDB(user);
+            
+            // Send notification for welcome email
+            sendNewUserNotification(user, tempPassword);
             
             // Return success response
             return ApiGatewayResponse.success(objectMapper.writeValueAsString(user));
@@ -136,5 +145,27 @@ public class AdminCreateUserHandler implements RequestHandler<APIGatewayProxyReq
                 .build();
         
         dynamoDbClient.putItem(putItemRequest);
+    }
+    
+    private void sendNewUserNotification(User user, String tempPassword) {
+        try {
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("type", "NEW_USER");
+            notification.put("email", user.getEmail());
+            notification.put("name", user.getName());
+            notification.put("tempPassword", tempPassword);
+            
+            String messageBody = objectMapper.writeValueAsString(notification);
+            
+            SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+                    .queueUrl(notificationQueueUrl)
+                    .messageBody(messageBody)
+                    .build();
+            
+            sqsClient.sendMessage(sendMessageRequest);
+            logger.info("New user notification sent for: {}", user.getEmail());
+        } catch (Exception e) {
+            logger.error("Error sending new user notification", e);
+        }
     }
 }
