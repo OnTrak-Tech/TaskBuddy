@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardFooter } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { FaArrowLeft, FaCheck, FaEdit, FaHistory } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaHistory } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 interface Task {

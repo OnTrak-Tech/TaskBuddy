@@ -137,7 +137,7 @@ const AdminUsers = () => {
     }
   };
 
-  const handleSendInvitation = async (userId: string) => {
+  const handleSendInvitation = async () => {
     try {
       // In a real app, this would call the API
       // await fetch(`/api/users/${userId}/invite`, { method: 'POST' });
@@ -231,7 +231,7 @@ const AdminUsers = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button 
-                          onClick={() => handleSendInvitation(user.id)}
+                          onClick={handleSendInvitation}
                           className="text-primary-600 hover:text-primary-900 mr-3"
                         >
                           <FaEnvelope className="inline mr-1" /> Invite

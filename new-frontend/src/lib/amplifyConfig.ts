@@ -11,9 +11,9 @@ export function configureAmplify() {
   const config = {
     Auth: {
       Cognito: {
-        userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || 'us-east-1_example',
-        userPoolClientId: import.meta.env.VITE_COGNITO_CLIENT_ID || 'example-client-id',
-        identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID,
+        userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || 'eu-west-1_J7EKiwTfA',
+        userPoolClientId: import.meta.env.VITE_COGNITO_CLIENT_ID || 'n7u78450uvmbtgjdf6iai58cm',
+        identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID || 'eu-west-1:85133464-309e-41a4-b886-00d28efcfeab',
         loginWith: {
           username: true,
           email: true,
@@ -23,8 +23,8 @@ export function configureAmplify() {
     API: {
       REST: {
         TaskBuddyAPI: {
-          endpoint: import.meta.env.VITE_API_URL || 'https://api.example.com',
-          region: import.meta.env.VITE_REGION || 'us-east-1',
+          endpoint: import.meta.env.VITE_API_URL || 'https://wd1cddmaod.execute-api.eu-west-1.amazonaws.com',
+          region: import.meta.env.VITE_REGION || 'eu-west-1',
         }
       }
     }

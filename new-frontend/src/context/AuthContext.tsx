@@ -51,7 +51,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const checkUser = async () => {
     try {
       const userInfo = await getCurrentUser();
-      const session = await fetchAuthSession();
+      // Fetch session but not using it directly for now
+      await fetchAuthSession();
       
       const currentUser = {
         ...userInfo,

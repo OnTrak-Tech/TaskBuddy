@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
@@ -158,7 +157,6 @@ const UserTasks = () => {
             <FaFilter className="inline mr-1" /> Filter:
           </span>
           <select
-            aria-label="Filter tasks by status"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm border-gray-300 rounded-md"
@@ -175,7 +173,6 @@ const UserTasks = () => {
             <FaSort className="inline mr-1" /> Sort by:
           </span>
           <select
-            title="Sort tasks by"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm border-gray-300 rounded-md"

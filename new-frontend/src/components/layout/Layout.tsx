@@ -1,14 +1,11 @@
 import { ReactNode } from 'react';
 import Sidebar from './Sidebar';
-import { useAuth } from '../../context/AuthContext';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { isAdmin } = useAuth();
-
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
