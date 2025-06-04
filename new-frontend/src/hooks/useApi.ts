@@ -1,4 +1,4 @@
-import { API, Auth } from 'aws-amplify'
+import { API } from 'aws-amplify'
 import { useState } from 'react'
 
 interface ApiOptions {
@@ -37,7 +37,7 @@ export function useApi() {
       }
       
       console.log('API Request:', { path, method, options });
-      const response = await API.rest(method, apiName, path, options);
+      const response = await API.get(apiName, path, options);
       console.log('API Response:', response);
       return response as T;
     } catch (err) {
