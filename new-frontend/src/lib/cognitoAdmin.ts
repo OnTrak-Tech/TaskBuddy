@@ -1,4 +1,4 @@
-import { Auth } from 'aws-amplify';
+// Auth import removed as it's not used
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
 
 // Helper functions for Cognito admin operations

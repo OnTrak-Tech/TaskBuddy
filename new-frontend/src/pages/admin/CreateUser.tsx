@@ -14,7 +14,7 @@ const CreateUser = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const navigate = useNavigate()
-  const { callApi } = useApi()
+  // useApi hook is imported but not used in this component
   
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
