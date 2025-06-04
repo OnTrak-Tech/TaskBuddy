@@ -42,18 +42,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const checkUser = async () => {
-      setIsLoading(true);
       try {
-        // Ensure Amplify is configured before making auth calls
+        // Configure Amplify
         configureAmplify();
         
         try {
           // Get current user
           const userInfo = await getCurrentUser();
-          // Get session to access tokens
           const session = await fetchAuthSession();
-          
-          setIsAuthenticated(true);
           
           const currentUser = {
             ...userInfo,
@@ -64,27 +60,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           };
           
           setUser(currentUser);
+          setIsAuthenticated(true);
           
           // Check if user is admin
           const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
           setIsAdmin(Array.isArray(groups) && groups.includes('admin'));
         } catch (authError) {
-          // Expected for unauthenticated users
-          console.log('User not authenticated');
+          // Not authenticated - this is normal
           setUser(null);
           setIsAdmin(false);
           setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error('Error in auth setup:', error);
+        console.error('Auth error:', error);
         setUser(null);
         setIsAdmin(false);
         setIsAuthenticated(false);
       } finally {
+        // Always set loading to false
         setIsLoading(false);
       }
     };
 
+    // Run auth check
     checkUser();
   }, []);
 
@@ -95,7 +93,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsAdmin(false);
       setIsAuthenticated(false);
     } catch (error) {
-      console.error('Error signing out', error);
+      console.error('Error signing out:', error);
     }
   };
 

@@ -1,38 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
-import { FaClipboardList, FaArrowRight } from 'react-icons/fa';
+import { FaClipboardList } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
-import { signInWithRedirect } from 'aws-amplify/auth';
 
 export default function Home() {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const router = useRouter();
-  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      setRedirecting(true);
-      const timer = setTimeout(() => {
-        if (isAdmin) {
-          router.push('/admin/dashboard');
-        } else {
-          router.push('/tasks');
-        }
-      }, 500);
-      
-      return () => clearTimeout(timer);
+      if (isAdmin) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/tasks');
+      }
     }
   }, [isAuthenticated, isAdmin, router, isLoading]);
 
-  const handleSignIn = async () => {
-    try {
-      router.push('/login');
-    } catch (error) {
-      console.error('Error navigating to login', error);
-    }
+  const handleSignIn = () => {
+    router.push('/login');
   };
 
   return (
@@ -54,45 +43,6 @@ export default function Home() {
               <div className="text-center p-4">
                 <p className="text-primary-600 mb-4 font-medium">Loading...</p>
                 <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              </div>
-            ) : redirecting && isAuthenticated ? (
-              <div className="text-center p-4">
-                <p className="text-primary-600 mb-4 font-medium">You are signed in! Redirecting to dashboard...</p>
-                <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              </div>
-            ) : isAuthenticated ? (
-              <div className="space-y-4">
-                <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-green-700">
-                        Successfully signed in!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <Button
-                  onClick={() => {
-                    setRedirecting(true);
-                    setTimeout(() => {
-                      if (isAdmin) {
-                        router.push('/admin/dashboard');
-                      } else {
-                        router.push('/tasks');
-                      }
-                    }, 500);
-                  }}
-                  className="w-full"
-                >
-                  <FaArrowRight className="mr-2 h-4 w-4" />
-                  Go to Dashboard
-                </Button>
               </div>
             ) : (
               <div className="space-y-4">
