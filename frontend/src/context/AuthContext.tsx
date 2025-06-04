@@ -1,36 +1,13 @@
-'use client';
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { fetchAuthSession, getCurrentUser, signOut as amplifySignOut } from 'aws-amplify/auth';
-import { Amplify } from 'aws-amplify';
-
-// Configure Amplify directly
-Amplify.configure({
-  Auth: {
-    Cognito: {
-      userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || 'eu-west-1_J7EKiwTfA',
-      userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || 'n7u78450uvmbtgjdf6iai58cm',
-      identityPoolId: process.env.NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID || 'eu-west-1:85133464-309e-41a4-b886-00d28efcfeab',
-      loginWith: {
-        username: true,
-        email: true,
-      }
-    }
-  },
-  API: {
-    REST: {
-      TaskBuddyAPI: {
-        endpoint: process.env.NEXT_PUBLIC_API_URL || 'https://uzoqf3buyb.execute-api.eu-west-1.amazonaws.com/Prod',
-        region: process.env.NEXT_PUBLIC_REGION || 'eu-west-1',
-      }
-    }
-  }
-});
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface User {
   username: string;
   attributes: {
     email: string;
+    name?: string;
     [key: string]: any;
   };
 }
@@ -40,15 +17,15 @@ interface AuthContextType {
   isAdmin: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signOut: () => void;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isAdmin: false,
   isAuthenticated: false,
-  isLoading: false,
-  signOut: () => {},
+  isLoading: true,
+  signOut: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -60,8 +37,9 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -80,12 +58,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(currentUser);
         setIsAuthenticated(true);
         
+        // Check if user is admin
         const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
         setIsAdmin(Array.isArray(groups) && groups.includes('admin'));
       } catch (error) {
         setUser(null);
         setIsAdmin(false);
         setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -94,12 +75,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signOut = async () => {
     try {
+      setIsLoading(true);
       await amplifySignOut();
       setUser(null);
       setIsAdmin(false);
       setIsAuthenticated(false);
+      toast.success('Signed out successfully');
+      navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -10,9 +10,9 @@ export function configureAmplify() {
   const config = {
     Auth: {
       Cognito: {
-        userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || 'eu-west-1_J7EKiwTfA',
-        userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || 'n7u78450uvmbtgjdf6iai58cm',
-        identityPoolId: process.env.NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID || 'eu-west-1:85133464-309e-41a4-b886-00d28efcfeab',
+        userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || 'us-east-1_example',
+        userPoolClientId: import.meta.env.VITE_COGNITO_CLIENT_ID || 'example-client-id',
+        identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID,
         loginWith: {
           username: true,
           email: true,
@@ -22,8 +22,8 @@ export function configureAmplify() {
     API: {
       REST: {
         TaskBuddyAPI: {
-          endpoint: process.env.NEXT_PUBLIC_API_URL || 'https://uzoqf3buyb.execute-api.eu-west-1.amazonaws.com/Prod',
-          region: process.env.NEXT_PUBLIC_REGION || 'eu-west-1',
+          endpoint: import.meta.env.VITE_API_URL || 'https://api.example.com',
+          region: import.meta.env.VITE_REGION || 'us-east-1',
         }
       }
     }
@@ -32,6 +32,7 @@ export function configureAmplify() {
   try {
     Amplify.configure(config);
     isConfigured = true;
+    console.log('Amplify configured successfully');
   } catch (error) {
     console.error('Error configuring Amplify:', error);
   }

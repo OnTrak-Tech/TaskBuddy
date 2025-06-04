@@ -1,91 +1,81 @@
 # TaskBuddy Frontend
 
-A modern Next.js frontend for the TaskBuddy application.
+A React-based task management application with role-based authentication (Admin/User) that integrates with AWS Cognito and Lambda backend functions.
 
 ## Features
 
-- Built with Next.js 14 and React 18
-- TypeScript for type safety
+- Authentication System with AWS Cognito
+- Role-based Access Control (Admin/User)
+- Admin Dashboard with user and task management
+- User Dashboard with personal task management
+- Responsive design for all devices
+
+## Tech Stack
+
+- React 18+ with TypeScript
+- Vite for fast development
+- React Router for navigation
+- AWS Amplify for Cognito integration
 - Tailwind CSS for styling
-- AWS Amplify for authentication and API integration
-- Responsive design for mobile and desktop
-- Component-based architecture
+- React Toastify for notifications
+- React Icons for UI icons
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18.x or later
+- Node.js 16+
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository
-2. Navigate to the frontend directory:
-   ```bash
-   cd TaskBuddy/frontend-new
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+2. Install dependencies:
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory with the following variables:
-
+```bash
+cd new-frontend
+npm install
 ```
-NEXT_PUBLIC_REGION=eu-west-1
-NEXT_PUBLIC_COGNITO_USER_POOL_ID=eu-west-1_J7EKiwTfA
-NEXT_PUBLIC_COGNITO_CLIENT_ID=n7u78450uvmbtgjdf6iai58cm
-NEXT_PUBLIC_API_URL=https://uzoqf3buyb.execute-api.eu-west-1.amazonaws.com/Prod
-```
+
+3. Create a `.env.local` file based on `.env.example` and fill in your AWS credentials
 
 ### Development
 
-Run the development server:
-
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Building for Production
+### Build for Production
 
 ```bash
 npm run build
-# or
-yarn build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
 ```
 
 ## Project Structure
 
-- `src/app`: App router pages and layouts
 - `src/components`: Reusable UI components
-  - `src/components/ui`: Basic UI components
-  - `src/components/layout`: Layout components
 - `src/context`: React context providers
 - `src/hooks`: Custom React hooks
+- `src/pages`: Application pages
 - `src/lib`: Utility functions and configurations
-- `public`: Static assets
-
-## Authentication
-
-Authentication is handled through AWS Cognito using the AWS Amplify library. The `AuthProvider` context manages the authentication state and provides user information to the application.
-
-## API Integration
-
-API calls are made using the AWS Amplify API module. A custom `useApi` hook is provided for simplified API interactions with loading and error states.
-
-## Styling
-
-The application uses Tailwind CSS for styling with a custom theme defined in `tailwind.config.js`. Additional global styles are defined in `src/app/globals.css`.
+- `src/utils`: Helper functions
 
 ## Deployment
 
-The frontend can be deployed using AWS Amplify Hosting or any other static site hosting service that supports Next.js applications.
+This application is designed to be deployed on AWS Amplify. Follow these steps:
+
+1. Push your code to a Git repository
+2. Set up an Amplify project in the AWS Console
+3. Connect your repository to Amplify
+4. Configure build settings and environment variables
+5. Deploy
+
+## License
+
+This project is licensed under the MIT License.
