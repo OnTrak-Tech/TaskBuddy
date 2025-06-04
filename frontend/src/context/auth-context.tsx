@@ -2,7 +2,30 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { fetchAuthSession, getCurrentUser, signOut as amplifySignOut } from 'aws-amplify/auth';
-import { configureAmplify } from '@/lib/amplify-config';
+import { Amplify } from 'aws-amplify';
+
+// Configure Amplify directly
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || 'eu-west-1_J7EKiwTfA',
+      userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || 'n7u78450uvmbtgjdf6iai58cm',
+      identityPoolId: process.env.NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID || 'eu-west-1:85133464-309e-41a4-b886-00d28efcfeab',
+      loginWith: {
+        username: true,
+        email: true,
+      }
+    }
+  },
+  API: {
+    REST: {
+      TaskBuddyAPI: {
+        endpoint: process.env.NEXT_PUBLIC_API_URL || 'https://uzoqf3buyb.execute-api.eu-west-1.amazonaws.com/Prod',
+        region: process.env.NEXT_PUBLIC_REGION || 'eu-west-1',
+      }
+    }
+  }
+});
 
 interface User {
   username: string;
@@ -24,7 +47,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isAdmin: false,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false,
   signOut: () => {},
 });
 
@@ -37,52 +60,35 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
       try {
-        // Configure Amplify
-        configureAmplify();
+        const userInfo = await getCurrentUser();
+        const session = await fetchAuthSession();
         
-        try {
-          // Get current user
-          const userInfo = await getCurrentUser();
-          const session = await fetchAuthSession();
-          
-          const currentUser = {
-            ...userInfo,
-            attributes: {
-              email: userInfo.username,
-              ...userInfo.signInDetails?.loginId ? { email: userInfo.signInDetails.loginId } : {}
-            }
-          };
-          
-          setUser(currentUser);
-          setIsAuthenticated(true);
-          
-          // Check if user is admin
-          const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
-          setIsAdmin(Array.isArray(groups) && groups.includes('admin'));
-        } catch (authError) {
-          // Not authenticated - this is normal
-          setUser(null);
-          setIsAdmin(false);
-          setIsAuthenticated(false);
-        }
+        const currentUser = {
+          ...userInfo,
+          attributes: {
+            email: userInfo.username,
+            ...userInfo.signInDetails?.loginId ? { email: userInfo.signInDetails.loginId } : {}
+          }
+        };
+        
+        setUser(currentUser);
+        setIsAuthenticated(true);
+        
+        const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
+        setIsAdmin(Array.isArray(groups) && groups.includes('admin'));
       } catch (error) {
-        console.error('Auth error:', error);
         setUser(null);
         setIsAdmin(false);
         setIsAuthenticated(false);
-      } finally {
-        // Always set loading to false
-        setIsLoading(false);
       }
     };
 
-    // Run auth check
     checkUser();
   }, []);
 

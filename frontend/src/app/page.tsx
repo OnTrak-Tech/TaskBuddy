@@ -1,24 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/auth-context';
 import { FaClipboardList } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      if (isAdmin) {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/tasks');
-      }
-    }
-  }, [isAuthenticated, isAdmin, router, isLoading]);
 
   const handleSignIn = () => {
     router.push('/login');
@@ -39,24 +26,17 @@ export default function Home() {
           </div>
           
           <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10">
-            {isLoading ? (
-              <div className="text-center p-4">
-                <p className="text-primary-600 mb-4 font-medium">Loading...</p>
-                <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-center text-gray-700 mb-4">
-                  Sign in to access your tasks and manage your work.
-                </p>
-                <Button
-                  onClick={handleSignIn}
-                  className="w-full"
-                >
-                  Sign In
-                </Button>
-              </div>
-            )}
+            <div className="space-y-4">
+              <p className="text-center text-gray-700 mb-4">
+                Sign in to access your tasks and manage your work.
+              </p>
+              <Button
+                onClick={handleSignIn}
+                className="w-full"
+              >
+                Sign In
+              </Button>
+            </div>
           </div>
         </div>
       </div>

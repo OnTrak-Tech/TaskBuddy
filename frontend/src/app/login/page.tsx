@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, signOut } from 'aws-amplify/auth';
+import { signIn } from 'aws-amplify/auth';
 import React from 'react';
-import { Amplify } from 'aws-amplify';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -13,82 +12,33 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Log Amplify configuration on component mount
-  useEffect(() => {
-    console.log('Current Amplify configuration:', Amplify.getConfig());
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
     try {
-      // Sign out first to handle "already authenticated" error
-      try {
-        await signOut();
-        console.log('Successfully signed out previous user');
-      } catch (signOutErr) {
-        console.log('No previous user to sign out or error signing out');
+      await signIn({ username, password });
+      
+      // Simple redirect based on username for demo
+      if (username.includes('admin')) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/tasks');
       }
-      
-      // Now attempt to sign in
-      console.log('Attempting to sign in with username:', username);
-      const signInResult = await signIn({ username, password });
-      console.log('Sign in successful:', signInResult);
-      
-      // Wait a moment for the auth state to update
-      setTimeout(async () => {
-        try {
-          const { fetchAuthSession } = await import('aws-amplify/auth');
-          const session = await fetchAuthSession();
-          console.log('Full session data:', session);
-          console.log('Access token payload:', session.tokens?.accessToken.payload);
-          
-          // Check if the user is admin based on email (for testing)
-          const userEmail = username.toLowerCase();
-          const isAdminByEmail = userEmail.includes('admin') || userEmail === 'kwesijay8@gmail.com';
-          
-          // Check if user is in admin group from token
-          const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
-          const isAdminByGroup = Array.isArray(groups) && groups.includes('admin');
-          
-          const isAdmin = isAdminByEmail || isAdminByGroup;
-          
-          console.log('User email:', userEmail);
-          console.log('Is admin by email:', isAdminByEmail);
-          console.log('User groups:', groups);
-          console.log('Is admin by group:', isAdminByGroup);
-          console.log('Final admin status:', isAdmin);
-          
-          // Force reload to ensure auth state is fresh
-          if (isAdmin) {
-            console.log('Admin user detected - navigating to admin dashboard');
-            window.location.replace('/admin/dashboard');
-          } else {
-            console.log('Regular user detected - navigating to tasks');
-            window.location.replace('/tasks');
-          }
-        } catch (sessionErr) {
-          console.error('Error checking user role:', sessionErr);
-          window.location.replace('/tasks'); // Default fallback
-        }
-      }, 1500); // Longer delay to ensure auth state is updated
     } catch (err: any) {
       console.error('Error signing in:', err);
-      setError(err.message || 'Authentication failed. Please check your credentials.');
+      setError(err.message || 'Authentication failed');
       setLoading(false);
     }
   };
 
-  // For testing/development only - hardcoded admin login
+  // For testing/development only
   const handleDevLogin = () => {
     setLoading(true);
-    // Use window.location for a full page navigation instead of Next.js router
     setTimeout(() => {
-      console.log('Development login successful - forcing navigation');
-      window.location.href = '/admin/dashboard';
-    }, 1000);
+      router.push('/admin/dashboard');
+    }, 500);
   };
 
   return (
@@ -144,18 +94,9 @@ export default function Login() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
-              {loading ? (
-                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
-              ) : null}
-              Sign in
+              {loading ? "Signing in..." : "Sign in"}
             </button>
             
-            {/* Development login button */}
             <button
               type="button"
               onClick={handleDevLogin}
