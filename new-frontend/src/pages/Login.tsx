@@ -32,9 +32,19 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
+      // Sign in with Amplify
       await signIn({ username: email, password });
+      
+      // Add a small delay to ensure the session is established
       await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      // Refresh auth state
       await refreshAuthState();
+      
+      // Add direct navigation here
+      const userIsAdmin = email.includes('admin');
+      navigate(userIsAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
+      
       toast.success('Login successful');
     } catch (error: any) {
       console.error('Login error:', error);
