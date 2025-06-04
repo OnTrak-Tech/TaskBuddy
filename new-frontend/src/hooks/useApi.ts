@@ -59,10 +59,12 @@ export const useApi = () => {
           });
           break;
         case 'DELETE':
-          response = await del({
+          await del({
             apiName: 'TaskBuddyAPI',
             path,
           });
+          // For DELETE, we don't expect a response body
+          response = { body: null };
           break;
         default:
           throw new Error(`Unsupported method: ${method}`);
@@ -72,8 +74,13 @@ export const useApi = () => {
         toast.success(mergedOptions.successMessage);
       }
 
+      let data: T | null = null;
+      if (response && 'body' in response) {
+        data = response.body as T;
+      }
+
       setLoading(false);
-      return response.body as T;
+      return data;
     } catch (err) {
       const error = err as Error;
       setError(error);

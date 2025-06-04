@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
@@ -8,7 +7,6 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
 import AdminTasks from './pages/admin/Tasks';
 import AdminCreateTask from './pages/admin/CreateTask';
-import UserDashboard from './pages/user/Dashboard';
 import UserTasks from './pages/user/Tasks';
 import UserTaskDetail from './pages/user/TaskDetail';
 import Profile from './pages/Profile';
@@ -16,13 +14,8 @@ import NotFound from './pages/NotFound';
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import { configureAmplify } from './lib/amplifyConfig';
 
 function App() {
-  useEffect(() => {
-    configureAmplify();
-  }, []);
-
   const { isLoading } = useAuth();
 
   if (isLoading) {

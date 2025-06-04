@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn } from 'aws-amplify/auth';
 import { toast } from 'react-toastify';
@@ -9,14 +9,24 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin } = useAuth();
 
+  // Handle successful login and navigation
+  useEffect(() => {
+    if (loginSuccess && email) {
+      const userIsAdmin = email.includes('admin'); // Temporary logic for demo
+      navigate(userIsAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
+    }
+  }, [loginSuccess, email, navigate]);
+
   // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate(isAdmin ? '/admin/dashboard' : '/tasks');
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(isAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +41,10 @@ const Login = () => {
     try {
       await signIn({ username: email, password });
       toast.success('Login successful');
-      
-      // Navigation will happen in the auth context effect
+      setLoginSuccess(true);
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.message || 'Failed to sign in');
-    } finally {
       setIsLoading(false);
     }
   };

@@ -28,8 +28,6 @@ const ProtectedRoute = ({ allowedRole }: ProtectedRouteProps) => {
     return <Navigate to="/" replace />;
   }
 
-  // For admin routes, we want to ensure they're admins
-  // For user routes, both admins and regular users can access
   return (
     <Layout>
       <Outlet />

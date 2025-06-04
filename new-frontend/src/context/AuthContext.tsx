@@ -18,6 +18,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   signOut: () => Promise<void>;
+  refreshAuthState: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   signOut: async () => {},
+  refreshAuthState: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -41,37 +43,56 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const userInfo = await getCurrentUser();
-        const session = await fetchAuthSession();
-        
-        const currentUser = {
-          ...userInfo,
-          attributes: {
-            email: userInfo.username,
-            ...userInfo.signInDetails?.loginId ? { email: userInfo.signInDetails.loginId } : {}
-          }
-        };
-        
-        setUser(currentUser);
-        setIsAuthenticated(true);
-        
-        // Check if user is admin
-        const groups = session.tokens?.accessToken.payload['cognito:groups'] || [];
-        setIsAdmin(Array.isArray(groups) && groups.includes('admin'));
-      } catch (error) {
-        setUser(null);
-        setIsAdmin(false);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // For demo purposes - simulate admin check based on email
+  const checkIsAdmin = (email: string) => {
+    return email.includes('admin');
+  };
 
+  const checkUser = async () => {
+    try {
+      const userInfo = await getCurrentUser();
+      const session = await fetchAuthSession();
+      
+      const currentUser = {
+        ...userInfo,
+        attributes: {
+          email: userInfo.username,
+          ...userInfo.signInDetails?.loginId ? { email: userInfo.signInDetails.loginId } : {}
+        }
+      };
+      
+      setUser(currentUser);
+      setIsAuthenticated(true);
+      
+      // For demo purposes, check if admin based on email
+      const userEmail = currentUser.attributes.email;
+      const userIsAdmin = checkIsAdmin(userEmail);
+      setIsAdmin(userIsAdmin);
+      
+      console.log('Auth state updated:', { 
+        authenticated: true, 
+        isAdmin: userIsAdmin,
+        email: userEmail
+      });
+      
+    } catch (error) {
+      console.log('Not authenticated');
+      setUser(null);
+      setIsAdmin(false);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     checkUser();
   }, []);
+
+  const refreshAuthState = async () => {
+    setIsLoading(true);
+    await checkUser();
+  };
 
   const signOut = async () => {
     try {
@@ -91,7 +112,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, isAuthenticated, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, isAdmin, isAuthenticated, isLoading, signOut, refreshAuthState }}>
       {children}
     </AuthContext.Provider>
   );

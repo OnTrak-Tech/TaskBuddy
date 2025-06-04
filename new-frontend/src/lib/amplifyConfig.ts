@@ -7,6 +7,7 @@ export function configureAmplify() {
   // Only configure once
   if (isConfigured) return;
   
+  // For demo purposes, using hardcoded values
   const config = {
     Auth: {
       Cognito: {
