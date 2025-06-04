@@ -32,17 +32,9 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. Sign in with Amplify
       await signIn({ username: email, password });
-
-      // 2. Refresh AuthContext so user/isAdmin is updated
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await refreshAuthState();
-
-         // 3. Add direct navigation here
-      const userIsAdmin = email.includes('admin');
-      navigate(userIsAdmin ? '/admin/dashboard' : '/tasks', { replace: true });
-
-      // 3. Let useEffect handle the redirection
       toast.success('Login successful');
     } catch (error: any) {
       console.error('Login error:', error);
