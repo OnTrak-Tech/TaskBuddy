@@ -24,12 +24,19 @@ const UserTasks = () => {
   useEffect(() => {
     const fetchUserTasks = async () => {
       try {
+        console.log('Fetching tasks for user:', user?.username);
+        
+        // Get user ID from attributes or username
+        const userId = user?.attributes?.sub || user?.username;
+        
         const data = await callApi<Task[]>({ 
-          path: '/tasks/assigned',
+          path: '/tasks',
           headers: {
-            'x-user-id': user?.username || ''
+            'x-user-id': userId
           }
         })
+        
+        console.log('Tasks response:', data);
         setTasks(Array.isArray(data) ? data : [])
       } catch (err) {
         console.error('Error fetching tasks:', err)
@@ -42,7 +49,7 @@ const UserTasks = () => {
     if (user) {
       fetchUserTasks()
     }
-  }, [user])
+  }, [user, callApi])
   
   return (
     <div>

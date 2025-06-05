@@ -37,7 +37,21 @@ export function useApi() {
       }
       
       console.log('API Request:', { path, method, options });
-      const response = await API.get(apiName, path, options);
+      
+      let response;
+      switch (method) {
+        case 'POST':
+          response = await API.post(apiName, path, options);
+          break;
+        case 'PUT':
+          response = await API.put(apiName, path, options);
+          break;
+        case 'DELETE':
+          response = await API.del(apiName, path, options);
+          break;
+        default:
+          response = await API.get(apiName, path, options);
+      }
       console.log('API Response:', response);
       return response as T;
     } catch (err) {

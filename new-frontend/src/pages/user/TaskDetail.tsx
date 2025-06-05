@@ -3,16 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { useApi } from '../../hooks/useApi'
+import { useAuth } from '../../context/AuthContext'
 
 interface Task {
   taskId: string
   title: string
-  description?: string
+  description: string
   status: string
   priority: string
   createdAt: string
-  assignedBy?: string
   dueDate?: string
+  assignedTo?: string
+  assignedBy?: string
 }
 
 const TaskDetail = () => {
@@ -20,14 +22,24 @@ const TaskDetail = () => {
   const [task, setTask] = useState<Task | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [updating, setUpdating] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState('')
   const { callApi } = useApi()
+  const { user } = useAuth()
   const navigate = useNavigate()
   
   useEffect(() => {
-    const fetchTask = async () => {
+    const fetchTaskDetails = async () => {
       try {
-        const data = await callApi<Task>({ path: `/tasks/${id}` })
+        console.log('Fetching task details for ID:', id);
+        
+        const data = await callApi<Task>({ 
+          path: `/tasks/${id}`,
+          headers: {
+            'x-user-id': user?.username || ''
+          }
+        })
+        
+        console.log('Task details:', data);
         setTask(data)
       } catch (err) {
         console.error('Error fetching task details:', err)
@@ -37,27 +49,40 @@ const TaskDetail = () => {
       }
     }
     
-    if (id) {
-      fetchTask()
+    if (id && user) {
+      fetchTaskDetails()
     }
-  }, [id])
+  }, [id, user, callApi])
   
   const updateTaskStatus = async (newStatus: string) => {
     if (!task) return
     
-    setUpdating(true)
     try {
-      const updatedTask = await callApi<Task>({
-        path: `/tasks/${id}/status`,
+      setUpdateStatus('updating')
+      
+      await callApi({ 
+        path: `/tasks/${task.taskId}/status`,
         method: 'PUT',
-        body: { status: newStatus }
+        body: { status: newStatus },
+        headers: {
+          'x-user-id': user?.username || ''
+        }
       })
-      setTask(updatedTask)
+      
+      setTask({
+        ...task,
+        status: newStatus
+      })
+      
+      setUpdateStatus('success')
+      
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setUpdateStatus('')
+      }, 3000)
     } catch (err) {
       console.error('Error updating task status:', err)
-      setError('Failed to update task status')
-    } finally {
-      setUpdating(false)
+      setUpdateStatus('error')
     }
   }
   
@@ -97,6 +122,18 @@ const TaskDetail = () => {
         </Button>
       </div>
       
+      {updateStatus === 'success' && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+          Task status updated successfully!
+        </div>
+      )}
+      
+      {updateStatus === 'error' && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          Failed to update task status. Please try again.
+        </div>
+      )}
+      
       <Card>
         <div className="space-y-6">
           <div>
@@ -117,6 +154,12 @@ const TaskDetail = () => {
                 <dt className="text-sm font-medium text-gray-500">Priority</dt>
                 <dd className="mt-1 text-sm text-gray-900">{task.priority}</dd>
               </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Created</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {new Date(task.createdAt).toLocaleDateString()}
+                </dd>
+              </div>
               {task.dueDate && (
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Due Date</dt>
@@ -125,42 +168,49 @@ const TaskDetail = () => {
                   </dd>
                 </div>
               )}
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Created</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(task.createdAt).toLocaleDateString()}
-                </dd>
-              </div>
+              {task.assignedBy && (
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Assigned By</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{task.assignedBy}</dd>
+                </div>
+              )}
             </div>
           </div>
           
           <div>
             <h3 className="text-lg font-medium text-gray-900">Description</h3>
-            <div className="mt-2 prose prose-sm text-gray-500">
-              {task.description || 'No description provided'}
+            <div className="mt-2 prose prose-sm max-w-none text-gray-700">
+              <p>{task.description}</p>
             </div>
           </div>
           
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Actions</h3>
+            <h3 className="text-lg font-medium text-gray-900">Update Status</h3>
             <div className="mt-2 flex space-x-3">
-              {task.status === 'pending' && (
+              {task.status !== 'pending' && (
                 <Button 
-                  onClick={() => updateTaskStatus('in_progress')} 
-                  isLoading={updating}
-                  disabled={updating}
+                  onClick={() => updateTaskStatus('pending')}
+                  variant="secondary"
+                  isLoading={updateStatus === 'updating'}
                 >
-                  Start Task
+                  Mark as Pending
                 </Button>
               )}
-              
-              {task.status === 'in_progress' && (
+              {task.status !== 'in_progress' && (
                 <Button 
-                  onClick={() => updateTaskStatus('completed')} 
-                  isLoading={updating}
-                  disabled={updating}
+                  onClick={() => updateTaskStatus('in_progress')}
+                  variant="secondary"
+                  isLoading={updateStatus === 'updating'}
                 >
-                  Complete Task
+                  Mark as In Progress
+                </Button>
+              )}
+              {task.status !== 'completed' && (
+                <Button 
+                  onClick={() => updateTaskStatus('completed')}
+                  isLoading={updateStatus === 'updating'}
+                >
+                  Mark as Completed
                 </Button>
               )}
             </div>
