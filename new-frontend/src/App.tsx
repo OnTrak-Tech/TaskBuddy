@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
@@ -54,7 +54,8 @@ function App() {
             
             {/* User routes - accessible to all authenticated users */}
             <Route element={<UserRoute />}>
-              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/" element={<Navigate to="/tasks" replace />} />
+              <Route path="/dashboard" element={<Navigate to="/tasks" replace />} />
               <Route path="/tasks" element={<UserTasks />} />
               <Route path="/tasks/:id" element={<TaskDetail />} />
             </Route>

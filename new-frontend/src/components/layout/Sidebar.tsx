@@ -15,16 +15,18 @@ const Sidebar = () => {
       
       <nav className="mt-6">
         <ul>
-          <li>
-            <NavLink 
-              to="/" 
-              className={({ isActive }) => 
-                `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
-              }
-            >
-              Dashboard
-            </NavLink>
-          </li>
+          {isAdmin && (
+            <li>
+              <NavLink 
+                to="/" 
+                className={({ isActive }) => 
+                  `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
+                }
+              >
+                Dashboard
+              </NavLink>
+            </li>
+          )}
           
           {isAdmin && (
             <>
@@ -52,28 +54,16 @@ const Sidebar = () => {
           )}
           
           {!isAdmin && (
-            <>
-              <li>
-                <NavLink 
-                  to="/dashboard" 
-                  className={({ isActive }) => 
-                    `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
-                  }
-                >
-                  Dashboard
-                </NavLink>
-              </li>
-              <li>
-                <NavLink 
-                  to="/tasks" 
-                  className={({ isActive }) => 
-                    `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
-                  }
-                >
-                  My Tasks
-                </NavLink>
-              </li>
-            </>
+            <li>
+              <NavLink 
+                to="/tasks" 
+                className={({ isActive }) => 
+                  `flex items-center px-6 py-3 hover:bg-blue-50 ${isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
+                }
+              >
+                My Tasks
+              </NavLink>
+            </li>
           )}
           
           <li>
