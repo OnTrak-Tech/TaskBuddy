@@ -1,36 +1,31 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import App from './App'
 import './index.css'
 import { Amplify } from 'aws-amplify'
-import { getEnv } from './utils/env'
+import config from './config'
 
 // Configure Amplify
 Amplify.configure({
   Auth: {
-    region: getEnv('VITE_AWS_REGION'),
-    userPoolId: getEnv('VITE_USER_POOL_ID'),
-    userPoolWebClientId: getEnv('VITE_USER_POOL_CLIENT_ID'),
+    region: config.aws.region,
+    userPoolId: config.aws.userPoolId,
+    userPoolWebClientId: config.aws.userPoolClientId,
     mandatorySignIn: true,
   },
   API: {
     endpoints: [
       {
         name: 'taskbuddyApi',
-        endpoint: getEnv('VITE_API_ENDPOINT'),
-        region: getEnv('VITE_AWS_REGION')
+        endpoint: config.aws.apiEndpoint,
+        region: config.aws.region
       }
     ]
   }
 })
 
-// For debugging
-console.log('Environment:', {
-  region: getEnv('VITE_AWS_REGION'),
-  userPoolId: getEnv('VITE_USER_POOL_ID'),
-  userPoolWebClientId: getEnv('VITE_USER_POOL_CLIENT_ID'),
-  apiEndpoint: getEnv('VITE_API_ENDPOINT')
-});
+// Log configuration for debugging
+console.log('App initialized with region:', config.aws.region);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

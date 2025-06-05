@@ -1,8 +1,11 @@
-import { CognitoIdentityServiceProvider } from 'aws-sdk';
+// This file is for local development only
+// In production, user management should be handled by backend APIs
+
+import { Auth } from 'aws-amplify';
 
 // Helper functions for Cognito admin operations
 export const cognitoAdmin = {
-  // Create a new user as admin
+  // Create a new user
   async createUser(userData: {
     username: string;
     email: string;
@@ -10,53 +13,28 @@ export const cognitoAdmin = {
     role?: string;
   }) {
     try {
-      // Generate a temporary password
-      const tempPassword = Math.random().toString(36).slice(-8) + 
-                          Math.random().toString(36).toUpperCase().slice(-4) + 
-                          '!1';
-      
-      // Create Cognito service provider
-      const cognito = new CognitoIdentityServiceProvider({
-        region: import.meta.env.VITE_AWS_REGION,
+      // In production, this should call a backend API
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/admin/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`
+        },
+        body: JSON.stringify({
+          email: userData.email,
+          name: userData.name,
+          role: userData.role || 'user'
+        })
       });
       
-      // Prepare user attributes
-      const userAttributes = [
-        { Name: 'email', Value: userData.email },
-        { Name: 'email_verified', Value: 'true' },
-        { Name: 'name', Value: userData.name }
-      ];
-      
-      // Create user
-      const createUserParams = {
-        UserPoolId: import.meta.env.VITE_USER_POOL_ID,
-        Username: userData.username,
-        TemporaryPassword: tempPassword,
-        UserAttributes: userAttributes
-      };
-      
-      const createResult = await cognito.adminCreateUser(createUserParams).promise();
-      
-      // Add user to appropriate group if role is specified
-      if (userData.role) {
-        try {
-          const addToGroupParams = {
-            UserPoolId: import.meta.env.VITE_USER_POOL_ID,
-            Username: userData.username,
-            GroupName: userData.role.toLowerCase()
-          };
-          
-          await cognito.adminAddUserToGroup(addToGroupParams).promise();
-        } catch (groupError) {
-          console.warn('Could not add user to group:', groupError);
-          // Continue even if group assignment fails
-        }
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
       
-      // Return result with temp password
+      const data = await response.json();
       return {
-        user: createResult.User,
-        tempPassword
+        user: { Username: userData.username },
+        tempPassword: data.tempPassword || 'Check email for password'
       };
     } catch (error) {
       console.error('Error creating user:', error);
@@ -67,27 +45,21 @@ export const cognitoAdmin = {
   // Reset a user's password
   async resetUserPassword(username: string) {
     try {
-      // Generate a temporary password
-      const tempPassword = Math.random().toString(36).slice(-8) + 
-                          Math.random().toString(36).toUpperCase().slice(-4) + 
-                          '!1';
-      
-      // Create Cognito service provider
-      const cognito = new CognitoIdentityServiceProvider({
-        region: import.meta.env.VITE_AWS_REGION,
+      // In production, this should call a backend API
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/admin/users/${username}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`
+        }
       });
       
-      // Reset password
-      const params = {
-        UserPoolId: import.meta.env.VITE_USER_POOL_ID,
-        Username: username,
-        Password: tempPassword,
-        Permanent: false
-      };
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
       
-      await cognito.adminSetUserPassword(params).promise();
-      
-      return { tempPassword };
+      const data = await response.json();
+      return { tempPassword: data.tempPassword || 'Check email for password' };
     } catch (error) {
       console.error('Error resetting password:', error);
       throw error;
