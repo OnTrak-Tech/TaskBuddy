@@ -2,14 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TaskBuddy</title>
-    <script type="module" crossorigin src="/assets/index-13e89716.js"></script>
-    <link rel="stylesheet" href="/assets/index-40674351.css">
+    <!-- Environment variables for production -->
+    <script>
+      window.env = {
+        VITE_AWS_REGION: 'eu-west-1',
+        VITE_USER_POOL_ID: 'eu-west-1_J7EKiwTfA',
+        VITE_USER_POOL_CLIENT_ID: 'n7u78450uvmbtgjdf6iai58cm',
+        VITE_API_ENDPOINT: 'https://wd1cddmaod.execute-api.eu-west-1.amazonaws.com',
+        VITE_SES_SENDER_EMAIL: 'kwesijay8@gmail.com'
+      };
+    </script>
+    <link rel="stylesheet" href="./assets/index-40674351.css">
   </head>
   <body>
     <div id="root"></div>
-    
+    <script type="module" crossorigin src="./assets/index-13e89716.js"></script>
   </body>
 </html>
