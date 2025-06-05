@@ -8,7 +8,6 @@ export const cognitoAdmin = {
     email: string;
     name: string;
     role?: string;
-    department?: string;
   }) {
     try {
       // Generate a temporary password
@@ -21,12 +20,6 @@ export const cognitoAdmin = {
         region: import.meta.env.VITE_AWS_REGION,
       });
       
-      // Set credentials
-      cognito.config.credentials = {
-        accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-        secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
-      };
-      
       // Prepare user attributes
       const userAttributes = [
         { Name: 'email', Value: userData.email },
@@ -34,15 +27,12 @@ export const cognitoAdmin = {
         { Name: 'name', Value: userData.name }
       ];
       
-
-      
       // Create user
       const createUserParams = {
         UserPoolId: import.meta.env.VITE_USER_POOL_ID,
         Username: userData.username,
         TemporaryPassword: tempPassword,
         UserAttributes: userAttributes
-        // Removed MessageAction: 'SUPPRESS' to allow Cognito to send welcome emails
       };
       
       const createResult = await cognito.adminCreateUser(createUserParams).promise();
@@ -86,12 +76,6 @@ export const cognitoAdmin = {
       const cognito = new CognitoIdentityServiceProvider({
         region: import.meta.env.VITE_AWS_REGION,
       });
-      
-      // Set credentials
-      cognito.config.credentials = {
-        accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-        secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
-      };
       
       // Reset password
       const params = {

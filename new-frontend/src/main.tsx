@@ -1,19 +1,30 @@
 import React from 'react'
-import * as ReactDOM from 'react-dom/client'
+import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { Amplify } from 'aws-amplify'
-import config from './lib/amplifyConfig'
 
 // Configure Amplify
-Amplify.configure(config)
+Amplify.configure({
+  Auth: {
+    region: import.meta.env.VITE_AWS_REGION,
+    userPoolId: import.meta.env.VITE_USER_POOL_ID,
+    userPoolWebClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID,
+    mandatorySignIn: true,
+  },
+  API: {
+    endpoints: [
+      {
+        name: 'taskbuddyApi',
+        endpoint: import.meta.env.VITE_API_ENDPOINT,
+        region: import.meta.env.VITE_AWS_REGION
+      }
+    ]
+  }
+})
 
-const rootElement = document.getElementById('root')
-if (rootElement) {
-  const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  )
-}
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
