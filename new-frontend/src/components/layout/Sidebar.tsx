@@ -4,8 +4,11 @@ import { useAuth } from '../../context/AuthContext'
 const Sidebar = () => {
   const { signOut, user } = useAuth()
   
-  // Check if user is in the admin group
-  const isAdmin = user?.signInUserSession?.accessToken?.payload['cognito:groups']?.includes('admin')
+  // Check if user is in the admin group or has admin email
+  const groups = user?.signInUserSession?.accessToken?.payload['cognito:groups'] || [];
+  const isAdminByGroup = Array.isArray(groups) && groups.includes('admin');
+  const isAdminByEmail = user?.attributes?.email === 'kwesijay8@gmail.com';
+  const isAdmin = isAdminByGroup || isAdminByEmail;
 
   return (
     <div className="w-64 bg-white shadow-md h-full">

@@ -23,6 +23,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function checkAuthState() {
     try {
       const currentUser = await Auth.currentAuthenticatedUser()
+      
+      // Get the current session to ensure we have the latest token
+      const session = await Auth.currentSession();
+      currentUser.signInUserSession = session;
+      
+      console.log('Auth state checked:', currentUser.username);
+      console.log('User groups:', currentUser.signInUserSession?.accessToken?.payload['cognito:groups']);
+      console.log('User email:', currentUser.attributes?.email);
+      
       setUser(currentUser)
       setIsAuthenticated(true)
     } catch (error) {

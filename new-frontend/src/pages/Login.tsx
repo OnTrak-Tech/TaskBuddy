@@ -1,27 +1,52 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import Button from '../components/ui/Button'
 
 const Login = () => {
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  
   const { signIn } = useAuth()
   const navigate = useNavigate()
   
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    setError('')
     setIsLoading(true)
+    setError('')
     
     try {
-      await signIn(username, password)
-      navigate('/')
+      const user = await signIn(email, password)
+      console.log('Login successful:', user.username);
+      
+      // Check if user is admin
+      const groups = user?.signInUserSession?.accessToken?.payload['cognito:groups'] || [];
+      const isAdminByGroup = Array.isArray(groups) && groups.includes('admin');
+      const isAdminByEmail = user?.attributes?.email === 'kwesijay8@gmail.com';
+      const isAdmin = isAdminByGroup || isAdminByEmail;
+      
+      console.log('User groups:', groups);
+      console.log('Is admin by group:', isAdminByGroup);
+      console.log('Is admin by email:', isAdminByEmail);
+      console.log('Is admin (combined):', isAdmin);
+      
+      // Redirect based on role
+      if (isAdmin) {
+        navigate('/')
+      } else {
+        navigate('/tasks')
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in')
+      console.error('Login error:', err)
+      if (err.code === 'UserNotConfirmedException') {
+        setError('Please confirm your account first')
+      } else if (err.code === 'NotAuthorizedException') {
+        setError('Incorrect username or password')
+      } else if (err.code === 'UserNotFoundException') {
+        setError('User does not exist')
+      } else {
+        setError('Failed to sign in. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -36,54 +61,52 @@ const Login = () => {
           </h2>
         </div>
         
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-          
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="username" className="sr-only">
-                Username
-              </label>
+              <label htmlFor="email" className="sr-only">Email address</label>
               <input
-                id="username"
-                name="username"
-                type="text"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Email address"
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
               />
             </div>
           </div>
           
           <div>
-            <Button
+            <button
               type="submit"
-              fullWidth
-              isLoading={isLoading}
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
             >
-              Sign in
-            </Button>
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </button>
           </div>
         </form>
       </div>
